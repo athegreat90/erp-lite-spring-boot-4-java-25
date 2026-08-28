@@ -1,0 +1,66 @@
+spring:
+  application:
+    name: erp-lite
+
+  datasource:
+    username: athegreat
+    password: secret
+    url: jdbc:postgresql://localhost:5432/erp_db
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+
+  jpa:
+    hibernate:
+      ddl-auto: validate      # schema is owned by db/postgresql/init/*.sql
+    open-in-view: false
+    show-sql: ${JPA_SHOW_SQL:true}
+    properties:
+      hibernate:
+        format_sql: ${HIBERNATE_FORMAT_SQL:true}
+        jdbc:
+          time_zone: UTC
+        use_sql_comments: ${HIBERNATE_USE_SQL_COMMENTS:true}
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  mongodb:
+    uri: mongodb://athegreat:secret@localhost:27017/erp_catalog_db?authSource=admin
+
+  data:
+
+    mongodb:
+      auto-index-creation: true
+
+    redis:
+      host: localhost
+      port: 6379
+      password: secret
+      timeout: 2000
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+  web:
+    error:
+      include-message: ${ERROR_INCLUDE_MESSAGE:always}
+      include-binding-errors: ${ERROR_INCLUDE_BINDING:always}
+      include-stacktrace: ${ERROR_INCLUDE_STACKTRACE:always}
+
+
+
+logging:
+  pattern:
+    console: "%green(%d{yyyy-MM-dd HH:mm:ss}) %highlight(%-5level)[%blue(%t)] %yellow(%logger): %msg%n%throwable"
+
+  level:
+    root: ${LOG_LEVEL_ROOT:INFO}
+    org.springframework.web: ${LOG_LEVEL_WEB:DEBUG}
+    org.springframework.data: ${LOG_LEVEL_DATA:DEBUG}
+    org.hibernate.sql: ${LOG_LEVEL_SQL:DEBUG}
+    org.hibernate.type.descriptor.sql.BasicBinder: ${LOG_LEVEL_SQL_PARAMS:TRACE}
+    org.mongodb.driver: ${LOG_LEVEL_MONGO:DEBUG}
+
+server:
+  port: 9090

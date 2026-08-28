@@ -1,33 +1,65 @@
+import org.springframework.boot.gradle.plugin.SpringBootPlugin
+
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '4.1.1'
-    id 'io.spring.dependency-management' version '1.1.7'
+    id 'org.springframework.boot' version '4.1.1' apply false
+    id 'io.spring.dependency-management' version '1.1.7' apply false
 }
 
-group = 'de.alexandermora'
-version = '0.0.1-SNAPSHOT'
-description = 'erp-lite'
+allprojects {
+    group = 'de.alexandermora'
+    version = '0.0.1-SNAPSHOT'
 
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(25)
+    repositories {
+        mavenCentral()
     }
 }
 
-repositories {
-    mavenCentral()
-}
+subprojects {
+    apply plugin: 'java-library'
+    apply plugin: 'io.spring.dependency-management'
 
-dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-    compileOnly 'org.projectlombok:lombok'
-    annotationProcessor 'org.projectlombok:lombok'
-    testImplementation 'org.springframework.boot:spring-boot-starter-web-test'
-    testCompileOnly 'org.projectlombok:lombok'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-    testAnnotationProcessor 'org.projectlombok:lombok'
-}
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(25)
+        }
+    }
 
-tasks.named('test') {
-    useJUnitPlatform()
+    dependencyManagement {
+        imports {
+            mavenBom SpringBootPlugin.BOM_COORDINATES
+        }
+    }
+
+    dependencies {
+        // Lombok: shared across every module
+        compileOnly 'org.projectlombok:lombok'
+        annotationProcessor 'org.projectlombok:lombok'
+        testCompileOnly 'org.projectlombok:lombok'
+        testAnnotationProcessor 'org.projectlombok:lombok'
+
+
+        implementation 'org.mapstruct:mapstruct-processor:1.7.0.Beta2'
+        implementation 'org.mapstruct:mapstruct:1.7.0.Beta2'
+
+        implementation 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
+//        implementation 'org.mapstruct.extensions.spring:mapstruct-spring-annotations:2.0.0'
+
+        testImplementation 'org.springframework.boot:spring-boot-starter-test'
+        testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    }
+
+    // Spring Boot Docker Compose support: applied only to modules that are
+    // Boot applications (i.e. erp-api). At startup Boot looks for a
+    // compose.yaml at the module root, runs `docker compose up`, and wires
+    // the running services into the app's environment.
+    plugins.withId('org.springframework.boot') {
+        dependencies {
+            developmentOnly 'org.springframework.boot:spring-boot-docker-compose'
+        }
+    }
+
+    tasks.named('test') {
+        useJUnitPlatform()
+    }
 }

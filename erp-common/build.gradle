@@ -1,0 +1,4 @@
+// erp-common: cross-cutting utilities and shared types.
+// No dependencies on other erp modules — this is the base of the graph.
+dependencies {
+}

@@ -1,0 +1,70 @@
+services:
+  # PostgreSQL - Transactional database (Orders, Products)
+  postgres:
+    image: postgres:alpine
+    container_name: erp-postgres
+    environment:
+      POSTGRES_DB: erp_db
+      POSTGRES_USER: athegreat
+      POSTGRES_PASSWORD: secret
+      # Use a subdirectory under the mount point (postgres refuses to init
+      # directly into a mount that already contains files, e.g. .gitkeep).
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./db/postgresql/init:/docker-entrypoint-initdb.d
+      - ./db/postgresql/data:/var/lib/postgresql/data
+    networks:
+      - erp-vpc
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U athegreat -d erp_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  # MongoDB - Document database (Catalogs, AuditLogs, Product Queries)
+  # Note: the official mongo image has no alpine/slim variant, so pin the
+  # latest major instead.
+  mongodb:
+    image: mongo:8
+    container_name: erp-mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: athegreat
+      MONGO_INITDB_ROOT_PASSWORD: secret
+      MONGO_INITDB_DATABASE: erp_catalog_db
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./db/mongodb/init:/docker-entrypoint-initdb.d
+      - ./db/mongodb/data:/data/db
+    networks:
+      - erp-vpc
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')", "-u",
+             "athegreat", "-p", "secret", "--authenticationDatabase", "admin",
+             "--quiet"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+  # Redis - Catalog cache
+  redis:
+    image: redis:alpine
+    container_name: erp-redis
+    command: redis-server --requirepass secret --maxmemory 256mb --maxmemory-policy allkeys-lru --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./db/redis/data:/data
+    networks:
+      - erp-vpc
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "secret", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+networks:
+  erp-vpc:
+    driver: bridge

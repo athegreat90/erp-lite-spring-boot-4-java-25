@@ -35,3 +35,9 @@ out/
 
 ### VS Code ###
 .vscode/
+
+
+### Docker ###
+# Persisted service data — keep the folders, ignore their contents.
+db/**/data/*
+!db/**/data/.gitkeep

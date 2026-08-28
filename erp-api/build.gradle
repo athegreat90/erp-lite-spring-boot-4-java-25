@@ -1,0 +1,20 @@
+plugins {
+    // Only erp-api is a bootable Spring Boot application.
+    id 'org.springframework.boot'
+}
+
+dependencies {
+    implementation project(':erp-application')
+    implementation project(':erp-infrastructure')
+    implementation project(':erp-domain')
+    implementation project(':erp-common')
+
+    // Spring Web lives only in erp-api.
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+
+    // Integration tests run against a real Postgres via Testcontainers
+    // (the JPA schema uses uuid-ossp / pg_trgm, so H2 is not an option).
+    testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+    testImplementation 'org.testcontainers:testcontainers-junit-jupiter'
+    testImplementation 'org.testcontainers:testcontainers-postgresql'
+}

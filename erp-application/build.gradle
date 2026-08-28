@@ -1,0 +1,4 @@
+// erp-application: use cases / orchestration over the domain.
+dependencies {
+    api project(':erp-domain')
+}

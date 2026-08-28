@@ -1,0 +1,4 @@
+// erp-domain: entities, value objects, domain services. Plain Java, no framework.
+dependencies {
+    api project(':erp-common')
+}

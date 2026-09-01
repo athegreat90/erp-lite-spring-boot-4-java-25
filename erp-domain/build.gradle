@@ -1,4 +1,42 @@
 // erp-domain: entities, value objects, domain services. Plain Java, no framework.
+apply plugin: 'jacoco'
+
 dependencies {
     api project(':erp-common')
+}
+
+jacoco {
+    toolVersion = '0.8.13'
+}
+
+jacocoTestReport {
+    dependsOn test
+    reports {
+        xml.required = true
+        html.required = true
+    }
+}
+
+jacocoTestCoverageVerification {
+    dependsOn test
+    violationRules {
+        rule {
+            limit {
+                counter = 'LINE'
+                minimum = 1.00
+            }
+            limit {
+                counter = 'BRANCH'
+                minimum = 1.00
+            }
+        }
+    }
+}
+
+test {
+    finalizedBy jacocoTestReport
+}
+
+check {
+    dependsOn jacocoTestCoverageVerification
 }

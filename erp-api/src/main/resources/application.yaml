@@ -48,8 +48,6 @@ spring:
       include-binding-errors: ${ERROR_INCLUDE_BINDING:always}
       include-stacktrace: ${ERROR_INCLUDE_STACKTRACE:always}
 
-
-
 logging:
   pattern:
     console: "%green(%d{yyyy-MM-dd HH:mm:ss}) %highlight(%-5level)[%blue(%t)] %yellow(%logger): %msg%n%throwable"

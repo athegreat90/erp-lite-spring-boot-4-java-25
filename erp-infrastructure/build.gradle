@@ -13,6 +13,8 @@ dependencies {
 
     api 'org.postgresql:postgresql:42.7.13'
 
+    api 'software.amazon.awssdk:s3:2.54.7'
+
     testImplementation 'org.springframework.boot:spring-boot-starter-cache-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-data-mongodb-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-data-redis-test'

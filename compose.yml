@@ -64,7 +64,24 @@ services:
       timeout: 5s
       retries: 5
       start_period: 10s
+  # Floci - Local AWS emulator (S3/SQS/DynamoDB in-process; Lambda/RDS/etc. via Docker)
+  floci:
+    image: floci/floci:latest
+    container_name: erp-floci
+    ports:
+      - "4566:4566"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./db/floci/data:/app/data
+    environment:
+      FLOCI_HOSTNAME: floci
+      FLOCI_SERVICES_DOCKER_NETWORK: erp-vpc
+      FLOCI_STORAGE_MODE: persistent
+      FLOCI_STORAGE_PERSISTENT_PATH: /app/data
+    networks:
+      - erp-vpc
 
 networks:
   erp-vpc:
+    name: erp-vpc
     driver: bridge

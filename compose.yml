@@ -71,20 +71,24 @@ services:
     # ("License activation failed") unless LOCALSTACK_AUTH_TOKEN is set.
     image: localstack/localstack:4.5
     container_name: erp-localstack
-    # Only the edge port (4566) is needed for S3. The 4510-4559 range is for
-    # Lambda/ECS/etc. and publishing 50 ports noticeably slows `compose up` on
-    # Docker Desktop.
+    # 4566 is the edge port; 4510-4559 is the external-service port range
+    # (kept for parity with a full LocalStack setup).
     ports:
       - "4566:4566"
+      - "4510-4559:4510-4559"
     environment:
       SERVICES: s3
       AWS_DEFAULT_REGION: us-east-1
       AWS_ACCESS_KEY_ID: athegreat
       AWS_SECRET_ACCESS_KEY: secret
-      # DEBUG and PERSISTENCE are intentionally omitted: DEBUG=1 floods the logs,
-      # and PERSISTENCE needs a LocalStack licence (no-op on the community image,
-      # so S3 state is not kept across restarts anyway). The localstack-init
-      # service below recreates the bucket on every `compose up`.
+      # DEBUG=1 = verbose LocalStack logs. PERSISTENCE=1 + the volume below keep
+      # S3 state across restarts, but only take effect with a LOCALSTACK_AUTH_TOKEN
+      # (no-op on the token-free community image); localstack-init recreates the
+      # bucket on every `compose up` regardless.
+      DEBUG: 1
+      PERSISTENCE: 1
+    volumes:
+      - ./db/localstack/data:/var/lib/localstack
     networks:
       - erp-vpc
     healthcheck:

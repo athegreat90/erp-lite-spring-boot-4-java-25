@@ -20,10 +20,10 @@ Every script comes in two flavours with identical behaviour:
 
 ## Setup (run these once, in order)
 
-| # | Script | Purpose |
-|---|--------|---------|
-| 1 | `setup-aws-credentials` | Creates a dedicated `localstack` AWS CLI profile (endpoint `http://localhost:4566`, region `us-east-1`). Your real AWS credentials are not touched. |
-| 2 | `create-s3-bucket` | Creates the `erp-product-images` S3 bucket in LocalStack. Same effect as the one-shot `localstack-init` service, but runnable on demand. Safe to re-run. |
+| # | Script | Purpose                                                                                                                                                   |
+|---|--------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 1 | `setup-aws-credentials` | Creates a dedicated `localstack` AWS CLI profile (endpoint `http://localhost:4566`, region `us-east-1`). Your real AWS credentials are not touched.       |
+| 2 | `create-s3-bucket` | Creates the `erp-products-images` S3 bucket in LocalStack. Same effect as the one-shot `localstack-init` service, but runnable on demand. Safe to re-run. |
 
 ### Windows
 
@@ -56,14 +56,14 @@ Every script comes in two flavours with identical behaviour:
 
 ```sh
 aws --profile localstack --endpoint-url http://localhost:4566 s3 ls
-# 2026-09-01 18:38:00 erp-product-images
+# 2026-09-01 18:38:00 erp-products-images
 ```
 
 ## Examples
 
 | Script | Purpose |
 |--------|---------|
-| `s3-example` | End-to-end round-trip against the `erp-product-images` bucket: generate a sample file → upload → list + show metadata → download to a new path → verify identical → clean up. Read it to see the `aws s3 cp` calls for uploading and downloading. |
+| `s3-example` | End-to-end round-trip against the `erp-products-images` bucket: generate a sample file → upload → list + show metadata → download to a new path → verify identical → clean up. Read it to see the `aws s3 cp` calls for uploading and downloading. |
 
 ### Windows
 
@@ -96,17 +96,17 @@ Writes to `~/.aws/credentials` and `~/.aws/config`.
 ### `create-s3-bucket`
 
 ```
-PowerShell:  ./script/create-s3-bucket.ps1 [-Bucket erp-product-images] [-Profile localstack] [-EndpointUrl http://localhost:4566]
-bash:        [BUCKET=erp-product-images] [PROFILE=localstack] [ENDPOINT_URL=http://localhost:4566] ./script/create-s3-bucket.sh
+PowerShell:  ./script/create-s3-bucket.ps1 [-Bucket erp-products-images] [-Profile localstack] [-EndpointUrl http://localhost:4566]
+bash:        [BUCKET=erp-products-images] [PROFILE=localstack] [ENDPOINT_URL=http://localhost:4566] ./script/create-s3-bucket.sh
 ```
 
-Runs `aws --endpoint-url http://localhost:4566 s3 mb s3://erp-product-images`.
+Runs `aws --endpoint-url http://localhost:4566 s3 mb s3://erp-products-images`.
 
 ### `s3-example`
 
 ```
-PowerShell:  ./script/s3-example.ps1 [-Key examples/sample-product.json] [-Keep] [-Bucket erp-product-images] [-Profile localstack]
-bash:        [KEY=examples/sample-product.json] [KEEP=1] [BUCKET=erp-product-images] [PROFILE=localstack] ./script/s3-example.sh
+PowerShell:  ./script/s3-example.ps1 [-Key examples/sample-product.json] [-Keep] [-Bucket erp-products-images] [-Profile localstack]
+bash:        [KEY=examples/sample-product.json] [KEEP=1] [BUCKET=erp-products-images] [PROFILE=localstack] ./script/s3-example.sh
 ```
 
 Uploads with `aws s3 cp <file> s3://<bucket>/<key>` and downloads with

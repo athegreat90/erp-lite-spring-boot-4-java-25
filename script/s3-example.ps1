@@ -4,7 +4,7 @@
 
 .DESCRIPTION
     Walks the full round-trip so you can see how object storage works with the
-    `erp-product-images` bucket:
+    `erp-products-images` bucket:
 
         generate sample file -> upload -> list -> download to a new path ->
         show contents -> verify -> clean up
@@ -20,7 +20,7 @@
     Leave the uploaded object in the bucket instead of deleting it at the end.
 
 .PARAMETER Bucket
-    Target bucket. Default: "erp-product-images" (matches compose.yml).
+    Target bucket. Default: "erp-products-images" (matches compose.yml).
 
 .PARAMETER Profile
     AWS CLI profile to use. Default: "localstack".
@@ -35,7 +35,7 @@
 param(
     [string]$Key         = "examples/sample-product.json",
     [switch]$Keep,
-    [string]$Bucket      = "erp-product-images",
+    [string]$Bucket      = "erp-products-images",
     [string]$Profile     = "localstack",
     [string]$EndpointUrl = "http://localhost:4566"
 )

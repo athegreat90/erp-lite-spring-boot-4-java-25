@@ -3,7 +3,7 @@
 # End-to-end S3 example against LocalStack: upload a file and download it back.
 #
 # Walks the full round-trip so you can see how object storage works with the
-# `erp-product-images` bucket:
+# `erp-products-images` bucket:
 #     generate sample file -> upload -> list -> download to a new path ->
 #     show contents -> verify -> clean up
 #
@@ -18,7 +18,7 @@
 
 set -euo pipefail
 
-BUCKET="${BUCKET:-erp-product-images}"
+BUCKET="${BUCKET:-erp-products-images}"
 PROFILE="${PROFILE:-localstack}"
 ENDPOINT_URL="${ENDPOINT_URL:-http://localhost:4566}"
 KEY="${KEY:-examples/sample-product.json}"

@@ -51,8 +51,8 @@ The domain model is described declaratively in
 | PostgreSQL 17 (alpine) | `erp-postgres`      | `5432`               | DB `erp_db`, schema + seed data from `db/postgresql/init/*.sql` |
 | MongoDB 8            | `erp-mongodb`        | `27017`              | DB `erp_catalog_db`, seeded by `db/mongodb/init/init-mongo.js` |
 | Redis (alpine)       | `erp-redis`          | `6379`               | catalog cache, password-protected, AOF persistence           |
-| LocalStack 4.5       | `erp-localstack`     | `4566`, `4510-4559`  | S3 only; pinned to the last token-free community release      |
-| LocalStack bootstrap | `erp-localstack-init`| —                    | one-shot: creates the `erp-product-images` S3 bucket, then exits 0 |
+| LocalStack 4.5       | `erp-localstack`     | `4566`               | S3 only; pinned to the last token-free community release      |
+| LocalStack bootstrap | `erp-localstack-init`| —                    | one-shot: creates the `erp-products-images` S3 bucket, then exits 0 |
 
 Credentials for every service (course project — not secret): user `athegreat` /
 password `secret`. Persisted data lives under `db/<service>/data/` (git-ignored).
@@ -66,10 +66,11 @@ docker compose down        # stop
 docker compose down -v     # stop and wipe volumes
 ```
 
-> `erp-api` also has Spring Boot Docker Compose support on the classpath
-> (`developmentOnly`), so running the app from a `compose.yaml` at the module
-> root would start services automatically. The canonical file today is the
-> root `compose.yml`; start it manually as above.
+> `erp-api` has Spring Boot Docker Compose support on the classpath
+> (`developmentOnly`) but it is disabled (`spring.docker.compose.enabled=false`):
+> there is no `compose.yaml` at the module root, and letting it run
+> `docker compose up` on every boot blocks startup on the container health
+> checks. Start the root `compose.yml` manually as above.
 
 ### AWS / LocalStack setup
 
@@ -79,10 +80,10 @@ the S3 bucket. Scripts live in [`script/`](script/) and come in Windows
 
 **Run once, in order:**
 
-| # | Script                  | Purpose |
-|---|-------------------------|---------|
+| # | Script                  | Purpose                                                                                                                                           |
+|---|-------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------|
 | 1 | `setup-aws-credentials` | Creates a dedicated `localstack` AWS CLI profile (endpoint `http://localhost:4566`, region `us-east-1`). Your real AWS credentials are untouched. |
-| 2 | `create-s3-bucket`      | Creates the `erp-product-images` bucket in LocalStack. Same effect as `erp-localstack-init`, but runnable on demand. Safe to re-run. |
+| 2 | `create-s3-bucket`      | Creates the `erp-products-images` bucket in LocalStack. Same effect as `erp-localstack-init`, but runnable on demand. Safe to re-run.             |
 
 Windows (PowerShell):
 
@@ -105,7 +106,7 @@ Verify:
 
 ```sh
 aws --profile localstack --endpoint-url http://localhost:4566 s3 ls
-# 2026-09-01 18:38:00 erp-product-images
+# 2026-09-01 18:38:00 erp-products-images
 ```
 
 To see a full upload/download round-trip against the bucket, run the example
@@ -119,7 +120,7 @@ Overrides — PowerShell uses parameters, bash uses env vars:
 setup-aws-credentials   [-Profile localstack] [-Region us-east-1] [-EndpointUrl http://localhost:4566]
                         [PROFILE=…] [REGION=…] [ENDPOINT_URL=…]
 
-create-s3-bucket        [-Bucket erp-product-images] [-Profile localstack] [-EndpointUrl http://localhost:4566]
+create-s3-bucket        [-Bucket erp-products-images] [-Profile localstack] [-EndpointUrl http://localhost:4566]
                         [BUCKET=…] [PROFILE=…] [ENDPOINT_URL=…]
 ```
 

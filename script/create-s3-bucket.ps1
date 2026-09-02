@@ -25,7 +25,7 @@
 #>
 [CmdletBinding()]
 param(
-    [string]$Bucket      = "erp-product-images",
+    [string]$Bucket      = "erp-products-images",
     [string]$Profile     = "localstack",
     [string]$EndpointUrl = "http://localhost:4566"
 )

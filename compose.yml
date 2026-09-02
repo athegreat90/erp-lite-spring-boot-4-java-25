@@ -95,21 +95,21 @@ services:
   # once LocalStack is healthy. Not a mounted ready.d script, since this repo
   # has core.filemode=false and a chmod +x on such a script wouldn't survive
   # commit/clone (silently breaking bucket creation on a fresh checkout).
-  localstack-init:
-    image: amazon/aws-cli:latest
-    container_name: erp-localstack-init
-    depends_on:
-      localstack:
-        condition: service_healthy
-    environment:
-      AWS_DEFAULT_REGION: us-east-1
-      AWS_ACCESS_KEY_ID: athegreat
-      AWS_SECRET_ACCESS_KEY: secret
-    entrypoint: ["sh", "-c"]
-    command: >
-      "aws --endpoint-url=http://localstack:4566 s3 mb s3://erp-product-images || true"
-    networks:
-      - erp-vpc
+#  localstack-init:
+#    image: amazon/aws-cli:latest
+#    container_name: erp-localstack-init
+#    depends_on:
+#      localstack:
+#        condition: service_healthy
+#    environment:
+#      AWS_DEFAULT_REGION: us-east-1
+#      AWS_ACCESS_KEY_ID: athegreat
+#      AWS_SECRET_ACCESS_KEY: secret
+#    entrypoint: ["sh", "-c"]
+#    command: >
+#      "aws --endpoint-url=http://localstack:4566 s3 mb s3://erp-product-images || true"
+#    networks:
+#      - erp-vpc
 
 networks:
   erp-vpc:

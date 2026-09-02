@@ -17,7 +17,7 @@
 
 set -euo pipefail
 
-BUCKET="${BUCKET:-erp-product-images}"
+BUCKET="${BUCKET:-erp-products-images}"
 PROFILE="${PROFILE:-localstack}"
 ENDPOINT_URL="${ENDPOINT_URL:-http://localhost:4566}"
 

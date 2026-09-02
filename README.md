@@ -51,7 +51,7 @@ The domain model is described declaratively in
 | PostgreSQL 17 (alpine) | `erp-postgres`      | `5432`               | DB `erp_db`, schema + seed data from `db/postgresql/init/*.sql` |
 | MongoDB 8            | `erp-mongodb`        | `27017`              | DB `erp_catalog_db`, seeded by `db/mongodb/init/init-mongo.js` |
 | Redis (alpine)       | `erp-redis`          | `6379`               | catalog cache, password-protected, AOF persistence           |
-| LocalStack 4.5       | `erp-localstack`     | `4566`               | S3 only; pinned to the last token-free community release      |
+| LocalStack 4.5       | `erp-localstack`     | `4566`, `4510-4559`  | S3 only; pinned to the last token-free community release      |
 | LocalStack bootstrap | `erp-localstack-init`| —                    | one-shot: creates the `erp-products-images` S3 bucket, then exits 0 |
 
 Credentials for every service (course project — not secret): user `athegreat` /

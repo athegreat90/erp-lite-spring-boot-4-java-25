@@ -8,10 +8,10 @@
     reported and left untouched.
 
     Runs:
-        aws --endpoint-url http://localhost:4566 s3 mb s3://erp-product-images
+        aws --endpoint-url http://localhost:4566 s3 mb s3://erp-products-images
 
 .PARAMETER Bucket
-    Bucket name to create. Default: "erp-product-images" (matches compose.yml).
+    Bucket name to create. Default: "erp-products-images" (matches compose.yml).
 
 .PARAMETER Profile
     AWS CLI profile to use. Default: "localstack" (created by

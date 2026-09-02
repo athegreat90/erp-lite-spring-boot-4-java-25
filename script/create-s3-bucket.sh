@@ -7,7 +7,7 @@
 # reported and left untouched.
 #
 # Runs:
-#     aws --endpoint-url http://localhost:4566 s3 mb s3://erp-product-images
+#     aws --endpoint-url http://localhost:4566 s3 mb s3://erp-products-images
 #
 # Usage:
 #     ./script/create-s3-bucket.sh

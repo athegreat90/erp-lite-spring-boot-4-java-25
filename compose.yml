@@ -81,10 +81,10 @@ services:
       AWS_DEFAULT_REGION: us-east-1
       AWS_ACCESS_KEY_ID: athegreat
       AWS_SECRET_ACCESS_KEY: secret
-      # DEBUG=1 = verbose LocalStack logs. PERSISTENCE=1 + the volume below keep
-      # S3 state across restarts, but only take effect with a LOCALSTACK_AUTH_TOKEN
-      # (no-op on the token-free community image); localstack-init recreates the
-      # bucket on every `compose up` regardless.
+      # DEBUG=1: verbose LocalStack logs.
+      # PERSISTENCE=1 + the ./db/localstack/data volume are meant to keep S3 state
+      # across restarts. They are not effective on the community image, so
+      # localstack-init recreates the bucket on every `compose up`.
       DEBUG: 1
       PERSISTENCE: 1
     volumes:

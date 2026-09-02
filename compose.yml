@@ -64,22 +64,52 @@ services:
       timeout: 5s
       retries: 5
       start_period: 10s
-  # Floci - Local AWS emulator (S3/SQS/DynamoDB in-process; Lambda/RDS/etc. via Docker)
-  floci:
-    image: floci/floci:latest
-    container_name: erp-floci
+  # LocalStack - Local AWS emulator (S3 for product images)
+  localstack:
+    # Pin to the last token-free community release. The `latest`/`stable` tags
+    # now resolve to calendar-versioned images that quit with exit code 55
+    # ("License activation failed") unless LOCALSTACK_AUTH_TOKEN is set.
+    image: localstack/localstack:4.5
+    container_name: erp-localstack
     ports:
       - "4566:4566"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ./db/floci/data:/app/data
+      - "4510-4559:4510-4559"
     environment:
-      FLOCI_HOSTNAME: floci
-      FLOCI_SERVICES_DOCKER_NETWORK: erp-vpc
-      FLOCI_STORAGE_MODE: persistent
-      FLOCI_STORAGE_PERSISTENT_PATH: /app/data
+      SERVICES: s3
+      DEBUG: 1
+      PERSISTENCE: 1
+      AWS_DEFAULT_REGION: us-east-1
+      AWS_ACCESS_KEY_ID: athegreat
+      AWS_SECRET_ACCESS_KEY: secret
+    volumes:
+      - ./db/localstack/data:/var/lib/localstack
     networks:
       - erp-vpc
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4566/_localstack/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+  # One-shot bucket bootstrap: creates the S3 bucket used for product images
+  # once LocalStack is healthy. Not a mounted ready.d script, since this repo
+  # has core.filemode=false and a chmod +x on such a script wouldn't survive
+  # commit/clone (silently breaking bucket creation on a fresh checkout).
+#  localstack-init:
+#    image: amazon/aws-cli:latest
+#    container_name: erp-localstack-init
+#    depends_on:
+#      localstack:
+#        condition: service_healthy
+#    environment:
+#      AWS_DEFAULT_REGION: us-east-1
+#      AWS_ACCESS_KEY_ID: athegreat
+#      AWS_SECRET_ACCESS_KEY: secret
+#    entrypoint: ["sh", "-c"]
+#    command: >
+#      "aws --endpoint-url=http://localstack:4566 s3 mb s3://erp-product-images || true"
+#    networks:
+#      - erp-vpc
 
 networks:
   erp-vpc:

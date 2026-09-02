@@ -2,6 +2,15 @@ spring:
   application:
     name: erp-lite
 
+  # Infrastructure is managed manually via `docker compose up -d` (see README).
+  # Spring Boot Docker Compose support is on the classpath (developmentOnly) but
+  # disabled: there is no compose file at the erp-api module root, and letting it
+  # run `docker compose up` on every boot blocks startup until every service
+  # passes its health check.
+  docker:
+    compose:
+      enabled: false
+
   datasource:
     username: athegreat
     password: secret
@@ -47,8 +56,6 @@ spring:
       include-message: ${ERROR_INCLUDE_MESSAGE:always}
       include-binding-errors: ${ERROR_INCLUDE_BINDING:always}
       include-stacktrace: ${ERROR_INCLUDE_STACKTRACE:always}
-
-
 
 logging:
   pattern:

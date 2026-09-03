@@ -39,10 +39,14 @@ subprojects {
         testAnnotationProcessor 'org.projectlombok:lombok'
 
 
-        implementation 'org.mapstruct:mapstruct-processor:1.7.0.Beta2'
+        // MapStruct: API on the compile path, processor on the annotation-processor
+        // path (Gradle won't run processors from `implementation`).
+        // lombok-mapstruct-binding must precede mapstruct-processor.
         implementation 'org.mapstruct:mapstruct:1.7.0.Beta2'
-
-        implementation 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
+        annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
+        annotationProcessor 'org.mapstruct:mapstruct-processor:1.7.0.Beta2'
+        testAnnotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
+        testAnnotationProcessor 'org.mapstruct:mapstruct-processor:1.7.0.Beta2'
 //        implementation 'org.mapstruct.extensions.spring:mapstruct-spring-annotations:2.0.0'
 
         testImplementation 'org.springframework.boot:spring-boot-starter-test'

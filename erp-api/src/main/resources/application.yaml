@@ -1,4 +1,20 @@
 spring:
+
+  mail:
+    host: smtp.resend.com
+    port: 587
+    username: ${MAIL_USERNAME:resend}
+    password: ${MAIL_API_KEY}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+
   application:
     name: erp-lite
 
@@ -12,9 +28,9 @@ spring:
       enabled: false
 
   datasource:
-    username: athegreat
-    password: secret
-    url: jdbc:postgresql://localhost:5432/erp_db
+    username: ${DB_USERNAME:athegreat}
+    password: ${DB_PASSWORD:secret}
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/erp_db}
     driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: 10
@@ -34,17 +50,16 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
   mongodb:
-    uri: mongodb://athegreat:secret@localhost:27017/erp_catalog_db?authSource=admin
+    uri: mongodb://${MONGODB_USERNAME:athegreat}:${MONGODB_PASSWORD:secret}@${MONGODB_HOST:localhost}:${MONGODB_PORT:27017}/erp_catalog_db?authSource=admin
 
   data:
-
     mongodb:
       auto-index-creation: true
 
     redis:
-      host: localhost
-      port: 6379
-      password: secret
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:secret}
       timeout: 2000
       lettuce:
         pool:
@@ -71,3 +86,6 @@ logging:
 
 server:
   port: 9090
+
+resend:
+  from-address: watchtower@notifications.alexandermora.de  # replace with your verified domain address

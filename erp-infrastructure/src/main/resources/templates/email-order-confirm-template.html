@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="x-apple-disable-message-reformatting"/>
+    <meta name="color-scheme" content="light dark"/>
+    <meta name="supported-color-schemes" content="light dark"/>
+    <meta name="format-detection" content="telephone=no, date=no, address=no, email=no"/>
+    <title>Order Confirmation</title>
+    <style>
+        /* Table reset replacing deprecated cellpadding/cellspacing/border attributes */
+        table {
+            border-collapse: collapse;
+            border-spacing: 0;
+            border: 0;
+        }
+
+        /* Modern email dark-mode support (honored by Apple Mail, Outlook.com/iOS, Yahoo, etc.) */
+        @media (prefers-color-scheme: dark) {
+            body, .email-bg {
+                background-color: #0B1220 !important;
+            }
+
+            .card-container {
+                background-color: #111827 !important;
+            }
+
+            .summary-card {
+                background-color: #0F1B2E !important;
+                border-color: #1F2A3D !important;
+            }
+
+            .text-body, .text-row {
+                color: #E5E7EB !important;
+            }
+
+            .text-muted, .summary-label {
+                color: #9CA3AF !important;
+            }
+        }
+    </style>
+</head>
+
+<body class="email-bg"
+      style="margin:0;padding:0;background-color:#F3F6F9;font-family:Arial,Helvetica,sans-serif;color:#1F2A37;">
+<!-- Preheader (hidden) -->
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;">
+    Your order {{orderNumber}} has been confirmed.
+</div>
+
+<table role="presentation" class="email-bg" style="width:100%;background-color:#F3F6F9;">
+    <tr>
+        <td style="padding:24px 12px;text-align:center;">
+            <!-- Container -->
+            <table role="presentation" class="card-container"
+                   style="width:640px;max-width:100%;background-color:#FFFFFF;border-radius:14px;overflow:hidden;box-shadow:0 10px 30px rgba(15,23,42,0.08);">
+                <!-- Header -->
+                <tr>
+                    <td style="background-color:#16537E;padding:22px 24px;">
+                        <table role="presentation" style="width:100%;">
+                            <tr>
+                                <td style="color:#FFFFFF;text-align:left;">
+                                    <div style="font-size:18px;line-height:22px;font-weight:700;">Purchase
+                                        Confirmation
+                                    </div>
+                                    <div style="font-size:13px;line-height:18px;opacity:0.95;margin-top:4px;">
+                                        Order <strong style="color:#FFFFFF;">{{orderNumber}}</strong> • Date:
+                                        {{orderDate}}
+                                    </div>
+                                </td>
+
+                                <!-- Badge (secondary color) -->
+                                <td style="text-align:right;">
+                                    <!-- Secondary color chosen: #F59E0B (amber) -->
+                                    <span style="display:inline-block;background-color:#F59E0B;color:#0B1F2B;font-size:12px;line-height:12px;font-weight:700;padding:10px 12px;border-radius:999px;">
+                        CONFIRMED
+                      </span>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+
+                <!-- Body -->
+                <tr>
+                    <td style="padding:22px 24px;">
+                        <div class="text-body" style="font-size:15px;line-height:22px;margin:0 0 14px 0;">
+                            Hello <strong>{{customerName}}</strong>, thank you for your purchase.
+                            We've received your order and it's now being processed. Here are the details:
+                        </div>
+
+                        <!-- Summary card -->
+                        <table role="presentation" class="summary-card"
+                               style="width:100%;background-color:#F8FAFC;border:1px solid #E5E7EB;border-radius:12px;">
+                            <tr>
+                                <td style="padding:16px 16px 10px 16px;">
+                                    <div class="summary-label"
+                                         style="font-size:13px;line-height:18px;color:#4B5563;margin-bottom:6px;">
+                                        Order summary
+                                    </div>
+
+                                    <table role="presentation" style="width:100%;">
+                                        <tr>
+                                            <td class="text-row"
+                                                style="padding:6px 0;font-size:14px;line-height:20px;color:#111827;">
+                                                <strong>Order number:</strong> {{orderNumber}}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-row"
+                                                style="padding:6px 0;font-size:14px;line-height:20px;color:#111827;">
+                                                <strong>Order ID:</strong> {{orderId}}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-row"
+                                                style="padding:6px 0;font-size:14px;line-height:20px;color:#111827;">
+                                                <strong>Purchase date:</strong> {{orderDate}}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-row"
+                                                style="padding:6px 0;font-size:14px;line-height:20px;color:#111827;">
+                                                <strong>Items:</strong> {{itemsCount}}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-row"
+                                                style="padding:6px 0;font-size:14px;line-height:20px;color:#111827;">
+                                                <strong>Total:</strong> {{totalAmount}} {{currency}}
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- CTA -->
+                        <table role="presentation" style="width:100%;">
+                            <tr>
+                                <td style="padding:18px 0 6px 0;text-align:center;">
+                                    <a href="{{orderDetailsUrl}}" target="_blank" rel="noopener noreferrer"
+                                       style="display:inline-block;background-color:#16537E;color:#FFFFFF;text-decoration:none;font-size:14px;font-weight:700;padding:12px 18px;border-radius:10px;">
+                                        View order details
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding:0 0 4px 0;font-size:12px;line-height:18px;color:#6B7280;text-align:center;"
+                                    class="text-muted">
+                                    If the button doesn't work, copy and paste this link: <span style="color:#16537E;">{{orderDetailsUrl}}</span>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- Help text -->
+                        <div class="text-muted" style="font-size:12px;line-height:18px;color:#6B7280;margin-top:12px;">
+                            If you notice any errors in this information, reply to this email and we'll be happy to
+                            help.
+                        </div>
+                    </td>
+                </tr>
+
+                <!-- Footer -->
+                <tr>
+                    <td style="padding:18px 24px;background-color:#0F2E45;">
+                        <div style="font-size:12px;line-height:18px;color:#E5E7EB;">
+                            This email is an automatic confirmation of your purchase.
+                        </div>
+                        <div style="font-size:12px;line-height:18px;color:#E5E7EB;margin-top:8px;">
+                            © {{year}} {{companyName}} • All rights reserved
+                        </div>
+                    </td>
+                </tr>
+            </table>
+
+            <!-- Spacer -->
+            <div style="height:16px;line-height:16px;">&nbsp;</div>
+
+            <!-- Small note -->
+            <div class="text-muted" style="font-size:11px;line-height:16px;color:#94A3B8;max-width:640px;">
+                For security reasons, please don't share sensitive information via email.
+            </div>
+        </td>
+    </tr>
+</table>
+</body>
+</html>

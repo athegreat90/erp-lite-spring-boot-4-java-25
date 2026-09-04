@@ -1,4 +1,6 @@
-package de.alexandermora.erplite.domain.customer;
+package de.alexandermora.erplite.domain.port;
+
+import de.alexandermora.erplite.domain.customer.CustomerInfo;
 
 import java.util.Optional;
 

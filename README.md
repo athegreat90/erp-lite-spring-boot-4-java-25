@@ -14,6 +14,8 @@ Redis and an S3 bucket emulated with LocalStack.
 | Build             | Gradle (wrapper included), multi-module             |
 | Persistence       | Spring Data JPA (PostgreSQL), Spring Data MongoDB, Spring Data Redis (cache) |
 | Object storage    | AWS S3 API via LocalStack                           |
+| External customer data | Spring `RestClient` → JsonPlaceholder REST API |
+| Email             | Spring Mail (JavaMailSender) via Resend SMTP relay, HTML template |
 | Mapping / boilerplate | MapStruct 1.7, Lombok                           |
 | Testing           | JUnit 5, Testcontainers (real Postgres for integration tests) |
 
@@ -124,6 +126,48 @@ create-s3-bucket        [-Bucket erp-products-images] [-Profile localstack] [-En
                         [BUCKET=…] [PROFILE=…] [ENDPOINT_URL=…]
 ```
 
+## External integrations
+
+### Customer data — JsonPlaceholder
+
+`CustomerProviderService` (domain port) is backed by a Spring `RestClient`
+adapter (`JsonPlaceholderCustomerProviderAdapter`) that fetches customer
+records from the public [JsonPlaceholder](https://jsonplaceholder.typicode.com/)
+API. Configuration lives in
+[`erp-api/src/main/resources/jsonplaceholder/jsonplaceholder.yml`](erp-api/src/main/resources/jsonplaceholder/jsonplaceholder.yml):
+
+```yaml
+jsonplaceholder:
+  api:
+    base-url: https://jsonplaceholder.typicode.com
+    users-endpoints: /users/{id}
+    connection-timeout: 5000
+    read-timeout: 5000
+    enabled: true
+```
+
+Set `enabled: false` to disable the adapter without removing it from the
+classpath.
+
+### Order confirmation email — Resend
+
+`OrderConfirmEmailService` (domain port) is implemented by `ResendAdapter`,
+which sends an HTML order-confirmation email through
+[Resend](https://resend.com/)'s SMTP relay using Spring Mail
+(`JavaMailSender`). The email body is built from the template at
+[`erp-infrastructure/src/main/resources/templates/email-order-confirm-template.html`](erp-infrastructure/src/main/resources/templates/email-order-confirm-template.html).
+
+Required configuration (`erp-api/src/main/resources/application.yaml`):
+
+| Setting | Source | Notes |
+|---------|--------|-------|
+| `spring.mail.username` | `MAIL_USERNAME` env var (default `resend`) | Resend SMTP username |
+| `spring.mail.password` | `MAIL_API_KEY` env var (**required**, no default) | Your Resend API key |
+| `resend.from-address`  | `application.yaml` property | Must be an address on a domain verified with Resend |
+
+Without a valid `MAIL_API_KEY`, sending an order confirmation email fails
+at runtime (the exception is logged and rethrown by `ResendAdapter`).
+
 ## Build & test
 
 ```sh
@@ -144,9 +188,16 @@ docker compose up -d
 ```
 
 The API listens on **`http://localhost:9090`**. Configuration lives in
-[`erp-api/src/main/resources/application.yaml`](erp-api/src/main/resources/application.yaml);
-most logging/behaviour toggles are overridable via environment variables
-(`LOG_LEVEL_ROOT`, `JPA_SHOW_SQL`, `ERROR_INCLUDE_STACKTRACE`, …).
+[`erp-api/src/main/resources/application.yaml`](erp-api/src/main/resources/application.yaml).
+Datasource/Mongo/Redis credentials default to the local Docker Compose
+values but are overridable via environment variables (`DB_USERNAME`,
+`DB_PASSWORD`, `DB_URL`, `MONGODB_USERNAME`, `MONGODB_PASSWORD`,
+`MONGODB_HOST`, `MONGODB_PORT`, `REDIS_HOST`, `REDIS_PORT`,
+`REDIS_PASSWORD`); mail credentials (`MAIL_USERNAME`, `MAIL_API_KEY`, see
+[External integrations](#external-integrations)) have no local default and
+must be set to send order-confirmation emails. Most logging/behaviour
+toggles are also overridable (`LOG_LEVEL_ROOT`, `JPA_SHOW_SQL`,
+`ERROR_INCLUDE_STACKTRACE`, …).
 
 ## Repository layout
 

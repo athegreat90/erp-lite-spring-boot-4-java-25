@@ -1,7 +1,7 @@
 package de.alexandermora.erplite.infrastructure.rest.customer.adapter;
 
 import de.alexandermora.erplite.domain.customer.CustomerInfo;
-import de.alexandermora.erplite.domain.customer.CustomerProviderService;
+import de.alexandermora.erplite.domain.port.CustomerProviderService;
 import de.alexandermora.erplite.infrastructure.rest.customer.dto.UserDTO;
 import de.alexandermora.erplite.infrastructure.rest.customer.mapper.CustomerMapper;
 import de.alexandermora.erplite.infrastructure.rest.customer.model.JsonPlaceHolderConfigModel;

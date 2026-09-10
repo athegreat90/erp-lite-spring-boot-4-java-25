@@ -35,6 +35,11 @@ subprojects {
         // Lombok: shared across every module
         compileOnly 'org.projectlombok:lombok'
         annotationProcessor 'org.projectlombok:lombok'
+
+
+        // Command records carry Jakarta Validation constraints; enforced by callers via @Valid.
+        implementation 'org.springframework.boot:spring-boot-starter-validation'
+
         testCompileOnly 'org.projectlombok:lombok'
         testAnnotationProcessor 'org.projectlombok:lombok'
 
@@ -54,9 +59,9 @@ subprojects {
     }
 
     // Spring Boot Docker Compose support: applied only to modules that are
-    // Boot applications (i.e. erp-api). At startup Boot looks for a
-    // compose.yaml at the module root, runs `docker compose up`, and wires
-    // the running services into the app's environment.
+    // Boot applications (i.e. erp-api). At startup Boot runs `docker compose up`
+    // for the file configured via spring.docker.compose.file (../compose.yml)
+    // and wires the running services into the app's environment.
     plugins.withId('org.springframework.boot') {
         dependencies {
             developmentOnly 'org.springframework.boot:spring-boot-docker-compose'

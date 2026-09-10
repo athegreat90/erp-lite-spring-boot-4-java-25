@@ -1,6 +1,7 @@
 package de.alexandermora.erplite.domain.order.events;
 
-import de.alexandermora.erplite.domain.order.OrderId;
+import de.alexandermora.erplite.domain.entity.order.OrderId;
+import de.alexandermora.erplite.domain.entity.order.events.OrderDelivered;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

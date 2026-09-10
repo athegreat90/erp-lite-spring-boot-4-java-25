@@ -1,4 +1,6 @@
 // erp-application: use cases / orchestration over the domain.
 dependencies {
     api project(':erp-domain')
+
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 }

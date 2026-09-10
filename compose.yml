@@ -83,29 +83,42 @@ services:
       AWS_SECRET_ACCESS_KEY: secret
       # DEBUG=1: verbose LocalStack logs.
       # PERSISTENCE=1 + the ./db/localstack/data volume are meant to keep S3 state
-      # across restarts. They are not effective on the community image, so
-      # localstack-init recreates the bucket on every `compose up`.
+      # across restarts. They are not effective on the community image, so the
+      # ready.d init hook below recreates the bucket on every `compose up`.
       DEBUG: 1
       PERSISTENCE: 1
     volumes:
       - ./db/localstack/data:/var/lib/localstack
+      # ready.d hook: creates the erp-products-images S3 bucket once LocalStack
+      # is ready (replaces the localstack-init container on a default `up`).
+      - ./db/localstack/init/ready.d:/etc/localstack/init/ready.d
     networks:
       - erp-vpc
+    labels:
+      # Spring Boot Docker Compose support (erp-api) TCP-probes every published
+      # port; nothing listens on most of 4510-4559, so skip its readiness check
+      # for this service. `docker compose up --wait` still gates on the
+      # healthcheck below.
+      org.springframework.boot.readiness-check.tcp.disable: "true"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:4566/_localstack/health"]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 15s
-  # One-shot bucket bootstrap: waits for LocalStack to report healthy, creates
-  # the S3 bucket used for product images, then exits 0. Reuses the localstack
-  # image (already pulled) for its bundled `awslocal`; LOCALSTACK_HOST points it
-  # at the localstack container rather than localhost. A mounted ready.d script
-  # is not used: LocalStack requires init scripts to be executable, and with
-  # core.filemode=false a committed +x bit would not survive clone.
+  # Optional one-shot bucket bootstrap, kept for manual/on-demand use:
+  #   docker compose --profile init up localstack-init
+  # The automatic path is the ready.d hook mounted into the `localstack` service
+  # above; this container does the same thing from the outside. It is gated
+  # behind the `init` profile so it does NOT run on a bare `docker compose up`
+  # (a container that exits 0 makes `docker compose up --wait`, which Spring Boot
+  # Docker Compose support runs, fail).
+  # Reuses the localstack image (already pulled) for its bundled `awslocal`;
+  # LOCALSTACK_HOST points it at the localstack container rather than localhost.
   localstack-init:
     image: localstack/localstack:4.5
     container_name: erp-localstack-init
+    profiles: ["init"]
     depends_on:
       localstack:
         condition: service_healthy

@@ -1,5 +1,8 @@
 package de.alexandermora.erplite.domain.catalog;
 
+import de.alexandermora.erplite.domain.entity.catalog.CatalogRoot;
+import de.alexandermora.erplite.domain.entity.catalog.CatalogItem;
+import de.alexandermora.erplite.domain.entity.catalog.CatalogType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -19,7 +22,7 @@ class CatalogTest {
     @DisplayName("Should throw IllegalArgumentException for catalogType before checking id")
     void shouldValidateCatalogTypeBeforeEntityId() {
         var exception = assertThrows(IllegalArgumentException.class,
-                () -> new Catalog(null, null, "name", "description", List.of(), true));
+                () -> new CatalogRoot(null, null, "name", "description", List.of(), true));
         assertEquals("Catalog type cannot be null", exception.getMessage());
     }
 
@@ -27,14 +30,14 @@ class CatalogTest {
     @DisplayName("Should throw IllegalArgumentException when name is null")
     void shouldThrowWhenNameIsNull() {
         var exception = assertThrows(IllegalArgumentException.class,
-                () -> new Catalog("1", CatalogType.COUNTRIES, null, "description", List.of(), true));
+                () -> new CatalogRoot("1", CatalogType.COUNTRIES, null, "description", List.of(), true));
         assertEquals("Catalog name cannot be null or empty", exception.getMessage());
     }
 
     @Test
     @DisplayName("Should allow an empty (but non-null) name, despite the exception message wording")
     void shouldAllowEmptyName() {
-        var catalog = new Catalog("1", CatalogType.COUNTRIES, "", "description", List.of(), true);
+        var catalog = new CatalogRoot("1", CatalogType.COUNTRIES, "", "description", List.of(), true);
         assertEquals("", catalog.getName());
     }
 
@@ -42,7 +45,7 @@ class CatalogTest {
     @DisplayName("Should throw IllegalArgumentException from Entity when id is null but catalogType/name are valid")
     void shouldThrowWhenIdIsNull() {
         var exception = assertThrows(IllegalArgumentException.class,
-                () -> new Catalog(null, CatalogType.COUNTRIES, "name", "description", List.of(), true));
+                () -> new CatalogRoot(null, CatalogType.COUNTRIES, "name", "description", List.of(), true));
         assertEquals("Entity ID cannot be null", exception.getMessage());
     }
 
@@ -50,13 +53,13 @@ class CatalogTest {
     @DisplayName("Should throw NullPointerException when items is null")
     void shouldThrowWhenItemsIsNull() {
         assertThrows(NullPointerException.class,
-                () -> new Catalog("1", CatalogType.COUNTRIES, "name", "description", null, true));
+                () -> new CatalogRoot("1", CatalogType.COUNTRIES, "name", "description", null, true));
     }
 
     @Test
     @DisplayName("Should create Catalog successfully with valid arguments")
     void shouldCreateSuccessfully() {
-        var catalog = new Catalog("1", CatalogType.COUNTRIES, "name", "description", List.of(item("i1", "c1")), true);
+        var catalog = new CatalogRoot("1", CatalogType.COUNTRIES, "name", "description", List.of(item("i1", "c1")), true);
         assertEquals(CatalogType.COUNTRIES, catalog.getCatalogType());
         assertEquals("name", catalog.getName());
         assertEquals("description", catalog.getDescription());
@@ -69,7 +72,7 @@ class CatalogTest {
     void shouldDefensivelyCopyItems() {
         var mutableList = new ArrayList<CatalogItem>();
         mutableList.add(item("i1", "c1"));
-        var catalog = new Catalog("1", CatalogType.COUNTRIES, "name", "description", mutableList, true);
+        var catalog = new CatalogRoot("1", CatalogType.COUNTRIES, "name", "description", mutableList, true);
 
         mutableList.add(item("i2", "c2"));
 
@@ -79,7 +82,7 @@ class CatalogTest {
     @Test
     @DisplayName("Should return an unmodifiable list from getItems()")
     void shouldReturnUnmodifiableItems() {
-        var catalog = new Catalog("1", CatalogType.COUNTRIES, "name", "description", List.of(item("i1", "c1")), true);
+        var catalog = new CatalogRoot("1", CatalogType.COUNTRIES, "name", "description", List.of(item("i1", "c1")), true);
         var items = catalog.getItems();
         assertThrows(UnsupportedOperationException.class, () -> items.add(item("i2", "c2")));
     }
@@ -87,7 +90,7 @@ class CatalogTest {
     @Test
     @DisplayName("Should find an item by matching code")
     void shouldFindItemByCode() {
-        var catalog = new Catalog("1", CatalogType.COUNTRIES, "name", "description", List.of(item("i1", "c1")), true);
+        var catalog = new CatalogRoot("1", CatalogType.COUNTRIES, "name", "description", List.of(item("i1", "c1")), true);
         var found = catalog.findItemByCode("c1");
         assertTrue(found.isPresent());
         assertEquals("c1", found.get().getCode());
@@ -96,42 +99,42 @@ class CatalogTest {
     @Test
     @DisplayName("Should return empty Optional when no item matches the code")
     void shouldReturnEmptyWhenCodeNotFound() {
-        var catalog = new Catalog("1", CatalogType.COUNTRIES, "name", "description", List.of(item("i1", "c1")), true);
+        var catalog = new CatalogRoot("1", CatalogType.COUNTRIES, "name", "description", List.of(item("i1", "c1")), true);
         assertTrue(catalog.findItemByCode("missing").isEmpty());
     }
 
     @Test
     @DisplayName("Should return empty Optional when items list is empty")
     void shouldReturnEmptyWhenItemsIsEmpty() {
-        var catalog = new Catalog("1", CatalogType.COUNTRIES, "name", "description", List.of(), true);
+        var catalog = new CatalogRoot("1", CatalogType.COUNTRIES, "name", "description", List.of(), true);
         assertTrue(catalog.findItemByCode("c1").isEmpty());
     }
 
     @Test
     @DisplayName("Should return empty Optional (not throw) when code is null")
     void shouldReturnEmptyWhenCodeIsNull() {
-        var catalog = new Catalog("1", CatalogType.COUNTRIES, "name", "description", List.of(item("i1", "c1")), true);
+        var catalog = new CatalogRoot("1", CatalogType.COUNTRIES, "name", "description", List.of(item("i1", "c1")), true);
         assertTrue(catalog.findItemByCode(null).isEmpty());
     }
 
     @Test
     @DisplayName("Should return true when the catalog contains an item with the given code")
     void shouldContainItem() {
-        var catalog = new Catalog("1", CatalogType.COUNTRIES, "name", "description", List.of(item("i1", "c1")), true);
+        var catalog = new CatalogRoot("1", CatalogType.COUNTRIES, "name", "description", List.of(item("i1", "c1")), true);
         assertTrue(catalog.containsItem("c1"));
     }
 
     @Test
     @DisplayName("Should return false when the catalog does not contain an item with the given code")
     void shouldNotContainItem() {
-        var catalog = new Catalog("1", CatalogType.COUNTRIES, "name", "description", List.of(item("i1", "c1")), true);
+        var catalog = new CatalogRoot("1", CatalogType.COUNTRIES, "name", "description", List.of(item("i1", "c1")), true);
         assertFalse(catalog.containsItem("missing"));
     }
 
     @Test
     @DisplayName("Should return empty list when items is empty for findActiveItems")
     void shouldReturnEmptyActiveItemsWhenEmpty() {
-        var catalog = new Catalog("1", CatalogType.COUNTRIES, "name", "description", List.of(), true);
+        var catalog = new CatalogRoot("1", CatalogType.COUNTRIES, "name", "description", List.of(), true);
         assertTrue(catalog.findActiveItems().isEmpty());
     }
 
@@ -142,7 +145,7 @@ class CatalogTest {
         var inactive = item("i2", "c2");
         inactive.turnOffStatus();
 
-        var catalog = new Catalog("1", CatalogType.COUNTRIES, "name", "description", List.of(active, inactive), true);
+        var catalog = new CatalogRoot("1", CatalogType.COUNTRIES, "name", "description", List.of(active, inactive), true);
         var activeItems = catalog.findActiveItems();
 
         assertEquals(1, activeItems.size());
@@ -155,14 +158,14 @@ class CatalogTest {
         var inactive = item("i1", "c1");
         inactive.turnOffStatus();
 
-        var catalog = new Catalog("1", CatalogType.COUNTRIES, "name", "description", List.of(inactive), true);
+        var catalog = new CatalogRoot("1", CatalogType.COUNTRIES, "name", "description", List.of(inactive), true);
         assertTrue(catalog.findActiveItems().isEmpty());
     }
 
     @Test
     @DisplayName("Should return all items when all are active")
     void shouldReturnAllWhenAllActive() {
-        var catalog = new Catalog("1", CatalogType.COUNTRIES, "name", "description",
+        var catalog = new CatalogRoot("1", CatalogType.COUNTRIES, "name", "description",
                 List.of(item("i1", "c1"), item("i2", "c2")), true);
         assertEquals(2, catalog.findActiveItems().size());
     }
@@ -174,15 +177,15 @@ class CatalogTest {
         var inactive = item("i2", "c2");
         inactive.turnOffStatus();
 
-        var catalog = new Catalog("1", CatalogType.COUNTRIES, "name", "description", List.of(active, inactive), true);
+        var catalog = new CatalogRoot("1", CatalogType.COUNTRIES, "name", "description", List.of(active, inactive), true);
         assertEquals(2, catalog.findAll().size());
     }
 
     @Test
     @DisplayName("Should be equal and share hashCode when all fields match")
     void shouldBeEqualWhenFieldsMatch() {
-        var catalog1 = new Catalog("1", CatalogType.COUNTRIES, "name", "description", List.of(item("i1", "c1")), true);
-        var catalog2 = new Catalog("1", CatalogType.COUNTRIES, "name", "description", List.of(item("i1", "c1")), true);
+        var catalog1 = new CatalogRoot("1", CatalogType.COUNTRIES, "name", "description", List.of(item("i1", "c1")), true);
+        var catalog2 = new CatalogRoot("1", CatalogType.COUNTRIES, "name", "description", List.of(item("i1", "c1")), true);
         assertEquals(catalog1, catalog2);
         assertEquals(catalog1.hashCode(), catalog2.hashCode());
     }
@@ -190,47 +193,47 @@ class CatalogTest {
     @Test
     @DisplayName("Should not be equal when id differs")
     void shouldNotBeEqualWhenIdDiffers() {
-        var catalog1 = new Catalog("1", CatalogType.COUNTRIES, "name", "description", List.of(item("i1", "c1")), true);
-        var catalog2 = new Catalog("2", CatalogType.COUNTRIES, "name", "description", List.of(item("i1", "c1")), true);
+        var catalog1 = new CatalogRoot("1", CatalogType.COUNTRIES, "name", "description", List.of(item("i1", "c1")), true);
+        var catalog2 = new CatalogRoot("2", CatalogType.COUNTRIES, "name", "description", List.of(item("i1", "c1")), true);
         assertNotEquals(catalog1, catalog2);
     }
 
     @Test
     @DisplayName("Should not be equal when catalogType differs")
     void shouldNotBeEqualWhenCatalogTypeDiffers() {
-        var catalog1 = new Catalog("1", CatalogType.COUNTRIES, "name", "description", List.of(item("i1", "c1")), true);
-        var catalog2 = new Catalog("1", CatalogType.CURRENCIES, "name", "description", List.of(item("i1", "c1")), true);
+        var catalog1 = new CatalogRoot("1", CatalogType.COUNTRIES, "name", "description", List.of(item("i1", "c1")), true);
+        var catalog2 = new CatalogRoot("1", CatalogType.CURRENCIES, "name", "description", List.of(item("i1", "c1")), true);
         assertNotEquals(catalog1, catalog2);
     }
 
     @Test
     @DisplayName("Should not be equal when name differs")
     void shouldNotBeEqualWhenNameDiffers() {
-        var catalog1 = new Catalog("1", CatalogType.COUNTRIES, "name1", "description", List.of(item("i1", "c1")), true);
-        var catalog2 = new Catalog("1", CatalogType.COUNTRIES, "name2", "description", List.of(item("i1", "c1")), true);
+        var catalog1 = new CatalogRoot("1", CatalogType.COUNTRIES, "name1", "description", List.of(item("i1", "c1")), true);
+        var catalog2 = new CatalogRoot("1", CatalogType.COUNTRIES, "name2", "description", List.of(item("i1", "c1")), true);
         assertNotEquals(catalog1, catalog2);
     }
 
     @Test
     @DisplayName("Should not be equal when items differs")
     void shouldNotBeEqualWhenItemsDiffers() {
-        var catalog1 = new Catalog("1", CatalogType.COUNTRIES, "name", "description", List.of(item("i1", "c1")), true);
-        var catalog2 = new Catalog("1", CatalogType.COUNTRIES, "name", "description", List.of(item("i1", "c2")), true);
+        var catalog1 = new CatalogRoot("1", CatalogType.COUNTRIES, "name", "description", List.of(item("i1", "c1")), true);
+        var catalog2 = new CatalogRoot("1", CatalogType.COUNTRIES, "name", "description", List.of(item("i1", "c2")), true);
         assertNotEquals(catalog1, catalog2);
     }
 
     @Test
     @DisplayName("Should not be equal when isActive differs")
     void shouldNotBeEqualWhenActiveStatusDiffers() {
-        var catalog1 = new Catalog("1", CatalogType.COUNTRIES, "name", "description", List.of(item("i1", "c1")), true);
-        var catalog2 = new Catalog("1", CatalogType.COUNTRIES, "name", "description", List.of(item("i1", "c1")), false);
+        var catalog1 = new CatalogRoot("1", CatalogType.COUNTRIES, "name", "description", List.of(item("i1", "c1")), true);
+        var catalog2 = new CatalogRoot("1", CatalogType.COUNTRIES, "name", "description", List.of(item("i1", "c1")), false);
         assertNotEquals(catalog1, catalog2);
     }
 
     @Test
     @DisplayName("Should include name in toString")
     void shouldIncludeNameInToString() {
-        var catalog = new Catalog("1", CatalogType.COUNTRIES, "name", "description", List.of(item("i1", "c1")), true);
+        var catalog = new CatalogRoot("1", CatalogType.COUNTRIES, "name", "description", List.of(item("i1", "c1")), true);
         assertTrue(catalog.toString().contains("name"));
     }
 }

@@ -1,5 +1,6 @@
 package de.alexandermora.erplite.domain.order;
 
+import de.alexandermora.erplite.domain.entity.order.Customer;
 import de.alexandermora.erplite.domain.shared.CustomerId;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

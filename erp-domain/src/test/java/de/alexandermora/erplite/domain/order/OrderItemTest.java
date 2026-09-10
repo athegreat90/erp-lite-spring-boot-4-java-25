@@ -1,10 +1,11 @@
 package de.alexandermora.erplite.domain.order;
 
-import de.alexandermora.erplite.domain.product.CategoryReference;
-import de.alexandermora.erplite.domain.product.Product;
-import de.alexandermora.erplite.domain.product.ProductName;
-import de.alexandermora.erplite.domain.product.SKU;
-import de.alexandermora.erplite.domain.product.Stock;
+import de.alexandermora.erplite.domain.entity.order.OrderItem;
+import de.alexandermora.erplite.domain.entity.product.CategoryReference;
+import de.alexandermora.erplite.domain.entity.product.ProductRoot;
+import de.alexandermora.erplite.domain.entity.product.ProductName;
+import de.alexandermora.erplite.domain.entity.product.SKU;
+import de.alexandermora.erplite.domain.entity.product.Stock;
 import de.alexandermora.erplite.domain.shared.Money;
 import de.alexandermora.erplite.domain.shared.Quantity;
 import org.junit.jupiter.api.DisplayName;
@@ -19,8 +20,8 @@ import static org.junit.jupiter.api.Assertions.*;
 @DisplayName("OrderItem Domain Test")
 class OrderItemTest {
 
-    private static Product createProduct(int stockQty, boolean active, String currencyCode) {
-        var product = Product.create(
+    private static ProductRoot createProduct(int stockQty, boolean active, String currencyCode) {
+        var product = ProductRoot.create(
                 SKU.of("LAPTOP-001"),
                 ProductName.of("Laptop"),
                 "A laptop",

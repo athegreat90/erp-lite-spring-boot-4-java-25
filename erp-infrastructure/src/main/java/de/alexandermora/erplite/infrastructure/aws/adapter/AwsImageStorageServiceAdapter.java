@@ -1,8 +1,8 @@
 package de.alexandermora.erplite.infrastructure.aws.adapter;
 
 import de.alexandermora.erplite.domain.exception.MyBusinessException;
-import de.alexandermora.erplite.domain.port.ImageStorageService;
-import de.alexandermora.erplite.domain.product.ProductImage;
+import de.alexandermora.erplite.domain.port.service.ImageStorageServicePort;
+import de.alexandermora.erplite.domain.entity.product.ProductImage;
 import de.alexandermora.erplite.infrastructure.aws.model.AwsConfigModel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +15,7 @@ import software.amazon.awssdk.services.s3.model.S3Exception;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class AwsImageStorageServiceAdapter implements ImageStorageService {
+public class AwsImageStorageServiceAdapter implements ImageStorageServicePort {
     private final S3Client awsClient;
     private final AwsConfigModel awsConfig;
 

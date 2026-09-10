@@ -1,6 +1,6 @@
 package de.alexandermora.erplite.infrastructure.rest.customer.mapper;
 
-import de.alexandermora.erplite.domain.customer.CustomerInfo;
+import de.alexandermora.erplite.domain.entity.customer.CustomerInfo;
 import de.alexandermora.erplite.infrastructure.rest.customer.dto.UserDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

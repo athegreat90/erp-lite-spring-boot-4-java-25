@@ -1,16 +1,17 @@
 package de.alexandermora.erplite.domain.order;
 
-import de.alexandermora.erplite.domain.order.events.OrderCancelled;
-import de.alexandermora.erplite.domain.order.events.OrderConfirmed;
-import de.alexandermora.erplite.domain.order.events.OrderCreated;
-import de.alexandermora.erplite.domain.order.events.OrderDelivered;
-import de.alexandermora.erplite.domain.order.events.OrderShipped;
-import de.alexandermora.erplite.domain.product.CategoryReference;
-import de.alexandermora.erplite.domain.product.Product;
-import de.alexandermora.erplite.domain.product.ProductId;
-import de.alexandermora.erplite.domain.product.ProductName;
-import de.alexandermora.erplite.domain.product.SKU;
-import de.alexandermora.erplite.domain.product.Stock;
+import de.alexandermora.erplite.domain.entity.order.*;
+import de.alexandermora.erplite.domain.entity.order.events.OrderCancelled;
+import de.alexandermora.erplite.domain.entity.order.events.OrderConfirmed;
+import de.alexandermora.erplite.domain.entity.order.events.OrderCreated;
+import de.alexandermora.erplite.domain.entity.order.events.OrderDelivered;
+import de.alexandermora.erplite.domain.entity.order.events.OrderShipped;
+import de.alexandermora.erplite.domain.entity.product.CategoryReference;
+import de.alexandermora.erplite.domain.entity.product.ProductRoot;
+import de.alexandermora.erplite.domain.entity.product.ProductId;
+import de.alexandermora.erplite.domain.entity.product.ProductName;
+import de.alexandermora.erplite.domain.entity.product.SKU;
+import de.alexandermora.erplite.domain.entity.product.Stock;
 import de.alexandermora.erplite.domain.shared.CustomerId;
 import de.alexandermora.erplite.domain.shared.Money;
 import de.alexandermora.erplite.domain.shared.Quantity;
@@ -30,8 +31,8 @@ import static org.junit.jupiter.api.Assertions.*;
 @DisplayName("Order Domain Test")
 class OrderTest {
 
-    private static Product product(String sku, int stockQty, String currencyCode) {
-        return Product.create(
+    private static ProductRoot product(String sku, int stockQty, String currencyCode) {
+        return ProductRoot.create(
                 SKU.of(sku),
                 ProductName.of("Product " + sku),
                 "description",
@@ -51,30 +52,30 @@ class OrderTest {
         return new Customer(CustomerId.of(1L), "John Doe");
     }
 
-    private static Order pendingOrder() {
-        return Order.create(OrderNumber.of("ORD-2025-001"), customer(),
+    private static OrderRoot pendingOrder() {
+        return OrderRoot.create(OrderNumber.of("ORD-2025-001"), customer(),
                 List.of(item("LAPTOP-001", 10, 1, "USD")), "tester");
     }
 
-    private static Order confirmedOrder() {
+    private static OrderRoot confirmedOrder() {
         var order = pendingOrder();
         order.confirm();
         return order;
     }
 
-    private static Order shippedOrder() {
+    private static OrderRoot shippedOrder() {
         var order = confirmedOrder();
         order.ship();
         return order;
     }
 
-    private static Order deliveredOrder() {
+    private static OrderRoot deliveredOrder() {
         var order = shippedOrder();
         order.deliver();
         return order;
     }
 
-    private static Order cancelledOrder() {
+    private static OrderRoot cancelledOrder() {
         var order = pendingOrder();
         order.cancel("customer changed mind");
         return order;
@@ -85,7 +86,7 @@ class OrderTest {
     @Test
     @DisplayName("Should throw IllegalArgumentException when no-arg constructor is invoked")
     void shouldThrowWhenNoArgConstructorInvoked() throws Exception {
-        var constructor = Order.class.getDeclaredConstructor();
+        var constructor = OrderRoot.class.getDeclaredConstructor();
         constructor.setAccessible(true);
         var exception = assertThrows(InvocationTargetException.class, constructor::newInstance);
         assertInstanceOf(IllegalArgumentException.class, exception.getCause());
@@ -98,7 +99,7 @@ class OrderTest {
     @DisplayName("Should throw IllegalArgumentException when orderNumber is null")
     void shouldThrowWhenOrderNumberIsNull() {
         var exception = assertThrows(IllegalArgumentException.class,
-                () -> Order.create(null, customer(), List.of(item("LAPTOP-001", 10, 1, "USD")), "tester"));
+                () -> OrderRoot.create(null, customer(), List.of(item("LAPTOP-001", 10, 1, "USD")), "tester"));
         assertEquals("Order number cannot be null", exception.getMessage());
     }
 
@@ -106,7 +107,7 @@ class OrderTest {
     @DisplayName("Should throw IllegalArgumentException when customer is null")
     void shouldThrowWhenCustomerIsNull() {
         var exception = assertThrows(IllegalArgumentException.class,
-                () -> Order.create(OrderNumber.of("ORD-2025-001"), null,
+                () -> OrderRoot.create(OrderNumber.of("ORD-2025-001"), null,
                         List.of(item("LAPTOP-001", 10, 1, "USD")), "tester"));
         assertEquals("Customer cannot be null", exception.getMessage());
     }
@@ -115,7 +116,7 @@ class OrderTest {
     @DisplayName("Should throw IllegalArgumentException when items is null")
     void shouldThrowWhenItemsIsNull() {
         var exception = assertThrows(IllegalArgumentException.class,
-                () -> Order.create(OrderNumber.of("ORD-2025-001"), customer(), null, "tester"));
+                () -> OrderRoot.create(OrderNumber.of("ORD-2025-001"), customer(), null, "tester"));
         assertEquals("Order must have at least one item", exception.getMessage());
     }
 
@@ -123,7 +124,7 @@ class OrderTest {
     @DisplayName("Should throw IllegalArgumentException when items is empty")
     void shouldThrowWhenItemsIsEmpty() {
         var exception = assertThrows(IllegalArgumentException.class,
-                () -> Order.create(OrderNumber.of("ORD-2025-001"), customer(), List.of(), "tester"));
+                () -> OrderRoot.create(OrderNumber.of("ORD-2025-001"), customer(), List.of(), "tester"));
         assertEquals("Order must have at least one item", exception.getMessage());
     }
 
@@ -133,7 +134,7 @@ class OrderTest {
         var usdItem = item("LAPTOP-001", 10, 1, "USD");
         var eurItem = item("MOUSE-001", 10, 1, "EUR");
         var exception = assertThrows(IllegalArgumentException.class,
-                () -> Order.create(OrderNumber.of("ORD-2025-001"), customer(), List.of(usdItem, eurItem), "tester"));
+                () -> OrderRoot.create(OrderNumber.of("ORD-2025-001"), customer(), List.of(usdItem, eurItem), "tester"));
         assertTrue(exception.getMessage().contains("All items must have the same currency"));
     }
 
@@ -143,7 +144,7 @@ class OrderTest {
     @DisplayName("Should propagate AuditInfo's exception when createdBy is blank")
     void shouldPropagateAuditInfoExceptionWhenCreatedByIsBlank(String createdBy) {
         var exception = assertThrows(IllegalArgumentException.class,
-                () -> Order.create(OrderNumber.of("ORD-2025-001"), customer(),
+                () -> OrderRoot.create(OrderNumber.of("ORD-2025-001"), customer(),
                         List.of(item("LAPTOP-001", 10, 1, "USD")), createdBy));
         assertEquals("createdBy must not be blank", exception.getMessage());
     }
@@ -153,7 +154,7 @@ class OrderTest {
     void shouldCreateOrderSuccessfully() {
         var firstItem = item("LAPTOP-001", 10, 2, "USD");
         var secondItem = item("MOUSE-001", 10, 1, "USD");
-        var order = Order.create(OrderNumber.of("ORD-2025-001"), customer(),
+        var order = OrderRoot.create(OrderNumber.of("ORD-2025-001"), customer(),
                 List.of(firstItem, secondItem), "tester");
 
         assertTrue(order.getStatus().isPending());
@@ -469,7 +470,7 @@ class OrderTest {
     @Test
     @DisplayName("validateItems(empty list) throws IllegalArgumentException (unreachable via public API)")
     void validateItemsThrowsForEmptyListViaReflection() throws Exception {
-        var method = Order.class.getDeclaredMethod("validateItems", List.class);
+        var method = OrderRoot.class.getDeclaredMethod("validateItems", List.class);
         method.setAccessible(true);
         var exception = assertThrows(InvocationTargetException.class, () -> method.invoke(null, List.of()));
         assertInstanceOf(IllegalArgumentException.class, exception.getCause());
@@ -479,7 +480,7 @@ class OrderTest {
     @Test
     @DisplayName("calculateTotal(empty list) throws IllegalArgumentException (unreachable via public API)")
     void calculateTotalThrowsForEmptyListViaReflection() throws Exception {
-        var method = Order.class.getDeclaredMethod("calculateTotal", List.class);
+        var method = OrderRoot.class.getDeclaredMethod("calculateTotal", List.class);
         method.setAccessible(true);
         var exception = assertThrows(InvocationTargetException.class, () -> method.invoke(null, List.of()));
         assertInstanceOf(IllegalArgumentException.class, exception.getCause());
@@ -507,7 +508,7 @@ class OrderTest {
                 product.getPrice(),
                 Money.of(BigDecimal.valueOf(999), Currency.getInstance("USD")));
 
-        var method = Order.class.getDeclaredMethod("validateItems", List.class);
+        var method = OrderRoot.class.getDeclaredMethod("validateItems", List.class);
         method.setAccessible(true);
         var exception = assertThrows(InvocationTargetException.class,
                 () -> method.invoke(null, List.of(tamperedItem)));

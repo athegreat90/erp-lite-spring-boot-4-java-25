@@ -21,7 +21,6 @@ import java.util.UUID;
 public class OrderProductEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     @EqualsAndHashCode.Include
     @Column(name = "id", nullable = false, updatable = false)
     private UUID id;

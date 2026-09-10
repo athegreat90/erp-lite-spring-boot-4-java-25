@@ -1,7 +1,7 @@
 package de.alexandermora.erplite.infrastructure.rest.customer.adapter;
 
-import de.alexandermora.erplite.domain.customer.CustomerInfo;
-import de.alexandermora.erplite.domain.port.CustomerProviderService;
+import de.alexandermora.erplite.domain.entity.customer.CustomerInfo;
+import de.alexandermora.erplite.domain.port.service.CustomerProviderServicePort;
 import de.alexandermora.erplite.infrastructure.rest.customer.dto.UserDTO;
 import de.alexandermora.erplite.infrastructure.rest.customer.mapper.CustomerMapper;
 import de.alexandermora.erplite.infrastructure.rest.customer.model.JsonPlaceHolderConfigModel;
@@ -17,7 +17,7 @@ import java.util.Optional;
 
 @Service
 @Slf4j
-public class JsonPlaceholderCustomerProviderAdapter implements CustomerProviderService {
+public class JsonPlaceholderCustomerProviderAdapter implements CustomerProviderServicePort {
 
     private final RestClient jsonClient;
     private final CustomerMapper customerMapper;

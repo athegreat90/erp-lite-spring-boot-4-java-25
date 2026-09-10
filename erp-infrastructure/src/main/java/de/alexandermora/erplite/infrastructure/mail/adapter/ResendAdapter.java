@@ -1,7 +1,7 @@
 package de.alexandermora.erplite.infrastructure.mail.adapter;
 
-import de.alexandermora.erplite.domain.order.OrderId;
-import de.alexandermora.erplite.domain.port.OrderConfirmEmailService;
+import de.alexandermora.erplite.domain.entity.order.OrderId;
+import de.alexandermora.erplite.domain.port.service.OrderConfirmEmailServicePort;
 import de.alexandermora.erplite.domain.shared.Email;
 import de.alexandermora.erplite.domain.shared.Money;
 import jakarta.mail.MessagingException;
@@ -21,7 +21,7 @@ import java.time.format.DateTimeFormatter;
 @Slf4j
 @RequiredArgsConstructor
 @Service
-public class ResendAdapter implements OrderConfirmEmailService {
+public class ResendAdapter implements OrderConfirmEmailServicePort {
 
     private final JavaMailSender mailSender;
 

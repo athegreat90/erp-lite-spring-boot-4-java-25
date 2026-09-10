@@ -21,4 +21,6 @@ public interface OrderRepository extends JpaRepository<OrderEntity, UUID> {
 
     @EntityGraph(attributePaths = "items")
     Optional<OrderEntity> findWithItemsById(UUID id);
+
+    List<OrderEntity> findAllByCustomerId(Long customerId);
 }

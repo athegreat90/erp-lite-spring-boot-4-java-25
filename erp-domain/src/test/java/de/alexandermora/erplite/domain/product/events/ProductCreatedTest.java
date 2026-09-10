@@ -1,8 +1,9 @@
 package de.alexandermora.erplite.domain.product.events;
 
-import de.alexandermora.erplite.domain.product.ProductId;
-import de.alexandermora.erplite.domain.product.ProductName;
-import de.alexandermora.erplite.domain.product.SKU;
+import de.alexandermora.erplite.domain.entity.product.ProductId;
+import de.alexandermora.erplite.domain.entity.product.ProductName;
+import de.alexandermora.erplite.domain.entity.product.SKU;
+import de.alexandermora.erplite.domain.entity.product.events.ProductCreated;
 import de.alexandermora.erplite.domain.shared.Money;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

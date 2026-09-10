@@ -1,5 +1,6 @@
 package de.alexandermora.erplite.domain.order;
 
+import de.alexandermora.erplite.domain.entity.order.OrderNumber;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;

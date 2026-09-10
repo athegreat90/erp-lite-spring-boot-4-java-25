@@ -1,5 +1,6 @@
 package de.alexandermora.erplite.domain.product;
 
+import de.alexandermora.erplite.domain.entity.product.ProductImage;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;

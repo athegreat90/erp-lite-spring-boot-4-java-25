@@ -1,9 +1,10 @@
 package de.alexandermora.erplite.domain.product;
 
-import de.alexandermora.erplite.domain.product.events.ProductCreated;
-import de.alexandermora.erplite.domain.product.events.ProductDeactivated;
-import de.alexandermora.erplite.domain.product.events.ProductUpdated;
-import de.alexandermora.erplite.domain.product.events.StockChanged;
+import de.alexandermora.erplite.domain.entity.product.*;
+import de.alexandermora.erplite.domain.entity.product.events.ProductCreated;
+import de.alexandermora.erplite.domain.entity.product.events.ProductDeactivated;
+import de.alexandermora.erplite.domain.entity.product.events.ProductUpdated;
+import de.alexandermora.erplite.domain.entity.product.events.StockChanged;
 import de.alexandermora.erplite.domain.shared.Money;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -47,8 +48,8 @@ class ProductTest {
         return ProductImage.of("https://example.com/images/laptop.png");
     }
 
-    private Product createProduct() {
-        return Product.create(sku(), name(), "A laptop", price(), stock(), category(), image(), "alex");
+    private ProductRoot createProduct() {
+        return ProductRoot.create(sku(), name(), "A laptop", price(), stock(), category(), image(), "alex");
     }
 
     @Test
@@ -81,7 +82,7 @@ class ProductTest {
     @DisplayName("Should throw IllegalArgumentException when creating with a null price")
     void shouldThrowWhenCreatingWithNullPrice() {
         var exception = assertThrows(IllegalArgumentException.class,
-                () -> Product.create(sku(), name(), "A laptop", null, stock(), category(), image(), "alex"));
+                () -> ProductRoot.create(sku(), name(), "A laptop", null, stock(), category(), image(), "alex"));
         assertEquals("Price cannot be null", exception.getMessage());
     }
 
@@ -90,7 +91,7 @@ class ProductTest {
     void shouldThrowWhenCreatingWithZeroPrice() {
         var zeroPrice = Money.of(BigDecimal.ZERO, USD);
         var exception = assertThrows(IllegalArgumentException.class,
-                () -> Product.create(sku(), name(), "A laptop", zeroPrice, stock(), category(), image(), "alex"));
+                () -> ProductRoot.create(sku(), name(), "A laptop", zeroPrice, stock(), category(), image(), "alex"));
         assertEquals("Price must be greater than 0", exception.getMessage());
     }
 
@@ -100,7 +101,7 @@ class ProductTest {
     @DisplayName("Should propagate AuditInfo's exception when createdBy is null or blank")
     void shouldPropagateAuditInfoExceptionWhenCreatedByIsBlank(String createdBy) {
         assertThrows(IllegalArgumentException.class,
-                () -> Product.create(sku(), name(), "A laptop", price(), stock(), category(), image(), createdBy));
+                () -> ProductRoot.create(sku(), name(), "A laptop", price(), stock(), category(), image(), createdBy));
     }
 
     @Test
@@ -337,7 +338,7 @@ class ProductTest {
     @Test
     @DisplayName("Should throw IllegalArgumentException when invoking the no-arg constructor via reflection")
     void shouldThrowWhenInvokingNoArgConstructorViaReflection() throws NoSuchMethodException {
-        Constructor<Product> constructor = Product.class.getDeclaredConstructor();
+        Constructor<ProductRoot> constructor = ProductRoot.class.getDeclaredConstructor();
         constructor.setAccessible(true);
 
         var invocationException = assertThrows(InvocationTargetException.class, constructor::newInstance);

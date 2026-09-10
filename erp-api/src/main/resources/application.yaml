@@ -18,14 +18,18 @@ spring:
   application:
     name: erp-lite
 
-  # Infrastructure is managed manually via `docker compose up -d` (see README).
-  # Spring Boot Docker Compose support is on the classpath (developmentOnly) but
-  # disabled: there is no compose file at the erp-api module root, and letting it
-  # run `docker compose up` on every boot blocks startup until every service
-  # passes its health check.
+  # Spring Boot Docker Compose support (spring-boot-docker-compose, developmentOnly
+  # -> no-op for the built jar). On `bootRun` it runs `docker compose up` for the
+  # root compose file and wires the running services into the environment.
+  # `file` is resolved against the bootRun working dir (erp-api/), hence
+  # `compose.yml`; override with DOCKER_COMPOSE_FILE when running the jar
+  # elsewhere. The `localstack-init` service is gated behind the `init` profile
+  # (an exiting container breaks `up --wait`); the S3 bucket is created by the
+  # LocalStack ready.d hook instead.
   docker:
     compose:
-      enabled: false
+      enabled: true
+      file: ${DOCKER_COMPOSE_FILE:compose.yml}
 
   datasource:
     username: ${DB_USERNAME:athegreat}

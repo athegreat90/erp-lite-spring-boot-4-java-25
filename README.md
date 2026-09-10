@@ -35,8 +35,8 @@ with `erp-common` available to all. The domain module has no Spring dependency
 and is covered by unit tests.
 
 The domain model is described declaratively in
-[`ia-spec/domain-spec.toml`](ia-spec/domain-spec.toml) (aggregates: `Order`,
-`Product`; plus `Catalog`, entities, value objects and domain events).
+[`ia-spec/domain-spec.toml`](ia-spec/domain-spec.toml) (aggregates: `OrderRoot`,
+`ProductRoot`; plus `CatalogRoot`, entities, value objects and domain events).
 
 ## Prerequisites
 
@@ -53,8 +53,8 @@ The domain model is described declaratively in
 | PostgreSQL 17 (alpine) | `erp-postgres`      | `5432`               | DB `erp_db`, schema + seed data from `db/postgresql/init/*.sql` |
 | MongoDB 8            | `erp-mongodb`        | `27017`              | DB `erp_catalog_db`, seeded by `db/mongodb/init/init-mongo.js` |
 | Redis (alpine)       | `erp-redis`          | `6379`               | catalog cache, password-protected, AOF persistence           |
-| LocalStack 4.5       | `erp-localstack`     | `4566`, `4510-4559`  | S3 only; pinned to the last token-free community release      |
-| LocalStack bootstrap | `erp-localstack-init`| —                    | one-shot: creates the `erp-products-images` S3 bucket, then exits 0 |
+| LocalStack 4.5       | `erp-localstack`     | `4566`, `4510-4559`  | S3 only; pinned to the last token-free community release. A `ready.d` init hook (`db/localstack/init/ready.d/010-create-bucket.py`) creates the `erp-products-images` bucket on every start |
+| LocalStack bootstrap | `erp-localstack-init`| —                    | optional one-shot bucket bootstrap; only runs under `docker compose --profile init up` |
 
 Credentials for every service (course project — not secret): user `athegreat` /
 password `secret`. Persisted data lives under `db/<service>/data/` (git-ignored).
@@ -62,30 +62,35 @@ password `secret`. Persisted data lives under `db/<service>/data/` (git-ignored)
 ### Start / stop
 
 ```sh
-docker compose up -d       # start everything
-docker compose ps -a       # check state (erp-localstack-init should be "exited (0)")
-docker compose down        # stop
-docker compose down -v     # stop and wipe volumes
+docker compose up -d              # start everything (bucket created by the ready.d hook)
+docker compose ps                 # check state
+docker compose --profile init up -d  # also run the optional erp-localstack-init container
+docker compose down               # stop
+docker compose down -v            # stop and wipe volumes
 ```
 
 > `erp-api` has Spring Boot Docker Compose support on the classpath
-> (`developmentOnly`) but it is disabled (`spring.docker.compose.enabled=false`):
-> there is no `compose.yaml` at the module root, and letting it run
-> `docker compose up` on every boot blocks startup on the container health
-> checks. Start the root `compose.yml` manually as above.
+> (`developmentOnly`) and it is **enabled** (`spring.docker.compose.enabled=true`,
+> `spring.docker.compose.file=../compose.yml`). Running `./gradlew :erp-api:bootRun`
+> from the repo root starts the root `compose.yml` automatically and wires the
+> services into the app; starting it manually as above also works. The
+> `erp-localstack-init` service is behind the `init` profile because a container
+> that exits breaks `docker compose up --wait`.
 
 ### AWS / LocalStack setup
 
-After the containers are up, configure a local AWS CLI profile and (re)create
-the S3 bucket. Scripts live in [`script/`](script/) and come in Windows
-(`.ps1`) and macOS/Linux (`.sh`) flavours with identical behaviour.
+The `erp-products-images` bucket is created automatically by the LocalStack
+`ready.d` hook whenever the containers come up. To configure a local AWS CLI
+profile (and (re)create the bucket on demand), use the scripts in
+[`script/`](script/) — they come in Windows (`.ps1`) and macOS/Linux (`.sh`)
+flavours with identical behaviour.
 
 **Run once, in order:**
 
 | # | Script                  | Purpose                                                                                                                                           |
 |---|-------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------|
 | 1 | `setup-aws-credentials` | Creates a dedicated `localstack` AWS CLI profile (endpoint `http://localhost:4566`, region `us-east-1`). Your real AWS credentials are untouched. |
-| 2 | `create-s3-bucket`      | Creates the `erp-products-images` bucket in LocalStack. Same effect as `erp-localstack-init`, but runnable on demand. Safe to re-run.             |
+| 2 | `create-s3-bucket`      | Creates the `erp-products-images` bucket in LocalStack. Same effect as the `ready.d` hook, but runnable on demand. Safe to re-run.                |
 
 Windows (PowerShell):
 
@@ -130,7 +135,7 @@ create-s3-bucket        [-Bucket erp-products-images] [-Profile localstack] [-En
 
 ### Customer data — JsonPlaceholder
 
-`CustomerProviderService` (domain port) is backed by a Spring `RestClient`
+`CustomerProviderServicePort` (domain port) is backed by a Spring `RestClient`
 adapter (`JsonPlaceholderCustomerProviderAdapter`) that fetches customer
 records from the public [JsonPlaceholder](https://jsonplaceholder.typicode.com/)
 API. Configuration lives in
@@ -151,7 +156,7 @@ classpath.
 
 ### Order confirmation email — Resend
 
-`OrderConfirmEmailService` (domain port) is implemented by `ResendAdapter`,
+`OrderConfirmEmailServicePort` (domain port) is implemented by `ResendAdapter`,
 which sends an HTML order-confirmation email through
 [Resend](https://resend.com/)'s SMTP relay using Spring Mail
 (`JavaMailSender`). The email body is built from the template at

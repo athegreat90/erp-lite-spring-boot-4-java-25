@@ -1,6 +1,6 @@
 package de.alexandermora.erplite.domain.port.repository;
 
-import de.alexandermora.erplite.domain.views.CatalogType;
+import de.alexandermora.erplite.commons.enums.CatalogType;
 import de.alexandermora.erplite.domain.views.CatalogView;
 import de.alexandermora.erplite.domain.views.ItemsView;
 

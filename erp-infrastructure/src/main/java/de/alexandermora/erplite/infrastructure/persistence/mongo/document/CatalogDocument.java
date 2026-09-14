@@ -1,5 +1,6 @@
 package de.alexandermora.erplite.infrastructure.persistence.mongo.document;
 
+import de.alexandermora.erplite.commons.enums.CatalogType;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;

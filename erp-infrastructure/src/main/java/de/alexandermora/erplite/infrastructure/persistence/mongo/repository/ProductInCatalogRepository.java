@@ -2,6 +2,7 @@ package de.alexandermora.erplite.infrastructure.persistence.mongo.repository;
 
 import de.alexandermora.erplite.infrastructure.persistence.mongo.document.ProductInCatalogDocument;
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -12,11 +13,12 @@ public interface ProductInCatalogRepository extends MongoRepository<ProductInCat
 
     Optional<ProductInCatalogDocument> findBySku(String sku);
 
-    boolean existsBySku(String sku);
+    List<ProductInCatalogDocument> findByNameContainingIgnoreCase(String name);
 
-    List<ProductInCatalogDocument> findByCategoryId(String categoryId);
+    @Query("{'$text': {'$search': ?0}, 'active': true}")
+    List<ProductInCatalogDocument> findByTextAndActive(String text);
 
-    List<ProductInCatalogDocument> findByActiveTrue();
+    List<ProductInCatalogDocument> findByCategoryIdAndActiveTrue(String categoryId);
 
-    List<ProductInCatalogDocument> findByTagsContaining(String tag);
+    List<ProductInCatalogDocument> findByActiveTrueOrderByIdAsc();
 }

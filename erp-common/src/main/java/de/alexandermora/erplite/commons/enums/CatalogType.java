@@ -1,4 +1,4 @@
-package de.alexandermora.erplite.domain.views;
+package de.alexandermora.erplite.commons.enums;
 
 import lombok.Getter;
 

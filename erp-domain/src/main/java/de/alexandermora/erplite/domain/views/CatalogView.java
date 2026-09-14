@@ -1,5 +1,7 @@
 package de.alexandermora.erplite.domain.views;
 
+import de.alexandermora.erplite.commons.enums.CatalogType;
+
 import java.time.Instant;
 import java.util.List;
 

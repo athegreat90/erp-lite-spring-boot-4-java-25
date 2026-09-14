@@ -81,6 +81,15 @@ docker compose down -v            # stop and wipe volumes
 > services into the app; starting it manually as above also works. The
 > `erp-localstack-init` service is behind the `init` profile because a container
 > that exits breaks `docker compose up --wait`.
+>
+> Docker Compose service connections auto-detect a service's host/port from
+> the running container, but for Redis it does **not** detect auth — so an
+> unmodified `redis` service started with `--requirepass` fails app startup
+> with `NOAUTH HELLO must be called with the client already authenticated`.
+> The `redis` service in `compose.yml` carries the label
+> `org.springframework.boot.ignore: "true"` to opt it out of auto-detection,
+> so the app falls back to the (correct, password-including)
+> `spring.data.redis.*` properties in `application.yaml` instead.
 
 ### AWS / LocalStack setup
 

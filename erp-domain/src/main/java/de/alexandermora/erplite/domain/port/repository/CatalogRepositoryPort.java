@@ -1,8 +1,8 @@
 package de.alexandermora.erplite.domain.port.repository;
 
-import de.alexandermora.erplite.domain.entity.catalog.CatalogRoot;
-import de.alexandermora.erplite.domain.entity.catalog.CatalogItem;
-import de.alexandermora.erplite.domain.entity.catalog.CatalogType;
+import de.alexandermora.erplite.commons.enums.CatalogType;
+import de.alexandermora.erplite.domain.views.CatalogView;
+import de.alexandermora.erplite.domain.views.ItemsView;
 
 import java.util.List;
 import java.util.Optional;
@@ -11,7 +11,9 @@ import java.util.Optional;
  * Port read-only for Catalog
  * */
 public interface CatalogRepositoryPort {
-    Optional<CatalogRoot> findByType(CatalogType catalogType);
-    List<CatalogItem> findItemsByType(CatalogType catalogType);
-    Optional<CatalogItem> findItemByTypeAndCode(CatalogType catalogType, String code);
+    Optional<CatalogView> findByType(CatalogType catalogType);
+
+    List<ItemsView> findItemsByType(CatalogType catalogType);
+
+    Optional<ItemsView> findItemByTypeAndCode(CatalogType catalogType, String code);
 }

@@ -9,6 +9,7 @@ import org.springframework.data.mongodb.core.mapping.FieldType;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Maps the {@code product_documents} collection in {@code erp_catalog_db}: the
@@ -51,7 +52,7 @@ public class ProductInCatalogDocument {
 
     private List<String> tags;
 
-    private ProductSpecifications specifications;
+    private Map<String, Object> specifications;
 
     private Instant createdAt;
 

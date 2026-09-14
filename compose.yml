@@ -11,7 +11,7 @@ services:
       # directly into a mount that already contains files, e.g. .gitkeep).
       PGDATA: /var/lib/postgresql/data/pgdata
     ports:
-      - "5432:5432"
+      - "15432:5432"
     volumes:
       - ./db/postgresql/init:/docker-entrypoint-initdb.d
       - ./db/postgresql/data:/var/lib/postgresql/data
@@ -33,7 +33,7 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: secret
       MONGO_INITDB_DATABASE: erp_catalog_db
     ports:
-      - "27017:27017"
+      - "27019:27017"
     volumes:
       - ./db/mongodb/init:/docker-entrypoint-initdb.d
       - ./db/mongodb/data:/data/db
@@ -58,6 +58,14 @@ services:
       - ./db/redis/data:/data
     networks:
       - erp-vpc
+    labels:
+      # Spring Boot Docker Compose support has no auth support for Redis: its
+      # RedisDockerComposeConnectionDetailsFactory only reads host/port from the
+      # container, ignoring --requirepass, and overrides spring.data.redis.*
+      # properties with an unauthenticated connection -> NOAUTH on startup.
+      # Skip auto-detection so the app falls back to the (correct) properties
+      # in application.yaml.
+      org.springframework.boot.ignore: "true"
     healthcheck:
       test: ["CMD", "redis-cli", "-a", "secret", "ping"]
       interval: 10s

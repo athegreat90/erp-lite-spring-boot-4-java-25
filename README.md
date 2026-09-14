@@ -34,6 +34,11 @@ Dependency direction: `erp-api → erp-infrastructure → erp-application → er
 with `erp-common` available to all. The domain module has no Spring dependency
 and is covered by unit tests.
 
+`erp-application` follows a CQRS-style split: `command/` + `usecase/` hold the
+write-side orchestration (e.g. `CreateOrderUseCase`, `UpdateStockUseCase`),
+while `query/` holds read-only handlers (e.g. `FindProductByIdQuery`,
+`FindCatalogByTypeQuery`) that go straight to the repository ports.
+
 The domain model is described declaratively in
 [`ia-spec/domain-spec.toml`](ia-spec/domain-spec.toml) (aggregates: `OrderRoot`,
 `ProductRoot`; plus `CatalogRoot`, entities, value objects and domain events).
@@ -76,6 +81,15 @@ docker compose down -v            # stop and wipe volumes
 > services into the app; starting it manually as above also works. The
 > `erp-localstack-init` service is behind the `init` profile because a container
 > that exits breaks `docker compose up --wait`.
+>
+> Docker Compose service connections auto-detect a service's host/port from
+> the running container, but for Redis it does **not** detect auth — so an
+> unmodified `redis` service started with `--requirepass` fails app startup
+> with `NOAUTH HELLO must be called with the client already authenticated`.
+> The `redis` service in `compose.yml` carries the label
+> `org.springframework.boot.ignore: "true"` to opt it out of auto-detection,
+> so the app falls back to the (correct, password-including)
+> `spring.data.redis.*` properties in `application.yaml` instead.
 
 ### AWS / LocalStack setup
 
@@ -172,6 +186,28 @@ Required configuration (`erp-api/src/main/resources/application.yaml`):
 
 Without a valid `MAIL_API_KEY`, sending an order confirmation email fails
 at runtime (the exception is logged and rethrown by `ResendAdapter`).
+
+## Caching
+
+The `query/` handlers in `erp-application` read through a cache-aside layer
+implemented directly in the Mongo repository adapters
+(`CatalogRepositoryAdapter`, `ProductCatalogRepository` in
+`erp-infrastructure`): each lookup checks Redis first via Spring's
+`CacheManager` and falls back to MongoDB on a miss. Cache names are
+centralized in
+[`CacheConstants`](erp-common/src/main/java/de/alexandermora/erplite/commons/constant/CacheConstants.java):
+
+- `products:byId`, `products:bySku`, `products:byCategory`, `products:active`
+- `catalogs:byType`, `catalogs:items`
+
+Redis wiring (a JSON-serializing `RedisCacheManager` and `RedisTemplate`)
+lives in
+[`RedisConfig`](erp-infrastructure/src/main/java/de/alexandermora/erplite/infrastructure/persistence/redis/RedisConfig.java),
+which hardcodes a 24h entry TTL for every cache listed above — this is the
+TTL that actually applies, since the bean is defined explicitly. `application.yaml`
+also sets `spring.cache.type: redis` and a `spring.cache.redis.time-to-live`,
+but that property has no effect here as it only configures Spring Boot's
+auto-created `RedisCacheManager`, which backs off in favor of the custom bean.
 
 ## Build & test
 

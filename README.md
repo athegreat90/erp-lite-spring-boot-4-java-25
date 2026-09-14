@@ -130,6 +130,14 @@ aws --profile localstack --endpoint-url http://localhost:4566 s3 ls
 # 2026-09-01 18:38:00 erp-products-images
 ```
 
+> Any other manual `aws` command against this bucket (e.g. `aws s3 cp`,
+> `aws s3 ls s3://erp-products-images/...`) needs the same `--profile localstack`
+> flag — or `export AWS_PROFILE=localstack` / `$env:AWS_PROFILE = "localstack"`
+> for the rest of the session — otherwise the CLI falls back to a `default`
+> profile that doesn't exist and fails with `Unable to locate credentials`.
+> See [Troubleshooting](script/README.md#troubleshooting) in `script/README.md`
+> for details.
+
 To see a full upload/download round-trip against the bucket, run the example
 script (`./script/s3-example.sh` or `s3-example.ps1`) — it generates a sample
 file, uploads it, downloads it back to a new path and verifies the two match.

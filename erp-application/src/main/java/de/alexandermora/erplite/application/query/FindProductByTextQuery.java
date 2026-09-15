@@ -1,5 +1,6 @@
 package de.alexandermora.erplite.application.query;
 
+import de.alexandermora.erplite.application.exception.QueryException;
 import de.alexandermora.erplite.domain.port.repository.ProductCatalogRepositoryPort;
 import de.alexandermora.erplite.domain.views.ProductView;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,10 @@ public class FindProductByTextQuery {
 
     public List<ProductView> execute(String text) {
         log.info("Executing FindProductByTextQuery for text: {}", text);
-        return productCatalogRepository.findByText(text);
+        try {
+            return productCatalogRepository.findByText(text);
+        } catch (RuntimeException e) {
+            throw new QueryException(e.getMessage(), e);
+        }
     }
 }

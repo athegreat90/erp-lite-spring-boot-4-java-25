@@ -1,5 +1,6 @@
 package de.alexandermora.erplite.application.query;
 
+import de.alexandermora.erplite.application.exception.QueryException;
 import de.alexandermora.erplite.domain.port.repository.ProductCatalogRepositoryPort;
 import de.alexandermora.erplite.domain.views.ProductView;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,10 @@ public class FindProductByIdQuery {
 
     public Optional<ProductView> execute(String id) {
         log.info("Executing FindProductByIdQuery for id: {}", id);
-        return productCatalogRepository.findById(id);
+        try {
+            return productCatalogRepository.findById(id);
+        } catch (RuntimeException e) {
+            throw new QueryException(e.getMessage(), e);
+        }
     }
 }

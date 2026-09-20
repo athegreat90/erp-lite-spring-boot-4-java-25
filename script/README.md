@@ -59,6 +59,51 @@ aws --profile localstack --endpoint-url http://localhost:4566 s3 ls
 # 2026-09-01 18:38:00 erp-products-images
 ```
 
+## Troubleshooting
+
+### `Unable to locate credentials` on `aws s3 ...` / `aws s3 cp ...`
+
+`setup-aws-credentials` only writes a **named** profile (`localstack` by
+default) — it never creates or touches a `[default]` profile, so your real
+AWS credentials stay untouched. That means any `aws` command that doesn't
+say which profile to use falls back to `default`, finds nothing there, and
+fails:
+
+```sh
+# missing --profile → falls back to the (nonexistent) default profile
+aws --endpoint-url=http://localhost:4566 s3 cp ./laptop.jpg s3://erp-products-images/products/laptop.jpg
+# upload failed: ... Unable to locate credentials
+```
+
+Fix: always pass `--profile localstack` alongside `--endpoint-url`, the same
+way `s3-example` and `create-s3-bucket` already do:
+
+```sh
+aws --profile localstack --endpoint-url http://localhost:4566 s3 cp \
+  ./laptop.jpg \
+  s3://erp-products-images/products/laptop.jpg
+```
+
+To avoid retyping `--profile localstack` for the rest of a shell session:
+
+```sh
+# bash / zsh
+export AWS_PROFILE=localstack
+aws --endpoint-url http://localhost:4566 s3 cp ./laptop.jpg s3://erp-products-images/products/laptop.jpg
+```
+
+```powershell
+# PowerShell
+$env:AWS_PROFILE = "localstack"
+aws --endpoint-url http://localhost:4566 s3 cp .\laptop.jpg s3://erp-products-images/products/laptop.jpg
+```
+
+`AWS_PROFILE` is read automatically by the AWS CLI. On AWS CLI v2.13+ the
+`endpoint_url` stored in the profile (by `setup-aws-credentials`) is also
+honoured automatically, so once `AWS_PROFILE=localstack` is set,
+`--endpoint-url` can be dropped too — though leaving it explicit is harmless
+and works on any CLI version.
+
 ## Examples
 
 | Script | Purpose |
@@ -81,6 +126,47 @@ KEY=examples/my-object.json KEEP=1 ./script/s3-example.sh
 
 `-Keep` / `KEEP=1` leaves the uploaded object in the bucket instead of
 deleting it at the end, so you can inspect it with `aws s3 ls`.
+
+## Product images
+
+| Script | Purpose |
+|--------|---------|
+| `upload-product-images` | Uploads every image in `script/img/` to `s3://erp-products-images/products/`, then prints each image's URL and matching `UPDATE public.products SET image_url = ... WHERE sku = ...` statements, ready to paste into `psql`. |
+
+Requires `-PublicHost` (PowerShell) / `PUBLIC_HOST` (bash) — the host that is
+actually reachable from wherever the app/browser will load the images from
+(e.g. the server's LAN IP), since the printed URLs are meant to be used
+outside this machine. This is separate from `-EndpointUrl` / `ENDPOINT_URL`,
+which stays `localhost` because the `aws` calls themselves run on this host.
+
+### Windows
+
+```powershell
+./script/upload-product-images.ps1 -PublicHost http://100.77.45.48:4566
+```
+
+### macOS / Linux
+
+```sh
+PUBLIC_HOST=http://100.77.45.48:4566 ./script/upload-product-images.sh
+```
+
+Sample output:
+
+```
+==> Image URLs
+  laptop.jpg -> http://100.77.45.48:4566/erp-products-images/products/laptop.jpg
+  monitor.jpg -> http://100.77.45.48:4566/erp-products-images/products/monitor.jpg
+
+==> SQL
+UPDATE public.products SET image_url = 'http://100.77.45.48:4566/erp-products-images/products/laptop.jpg'::varchar(500) WHERE sku = 'LAPTOP-001';
+UPDATE public.products SET image_url = 'http://100.77.45.48:4566/erp-products-images/products/monitor.jpg'::varchar(500) WHERE sku = 'MONITOR-001';
+```
+
+To add a new image: drop the file into `script/img/`, then add a
+`filename -> SKU` entry to `$FileSkuMap` / `FILE_SKU_MAP` at the top of the
+script (an image with no mapping entry still uploads, but its `UPDATE`
+statement is skipped with a warning).
 
 ## Script reference
 
@@ -111,3 +197,15 @@ bash:        [KEY=examples/sample-product.json] [KEEP=1] [BUCKET=erp-products-im
 
 Uploads with `aws s3 cp <file> s3://<bucket>/<key>` and downloads with
 `aws s3 cp s3://<bucket>/<key> <file>`.
+
+### `upload-product-images`
+
+```
+PowerShell:  ./script/upload-product-images.ps1 -PublicHost <host[:port]> [-Bucket erp-products-images] [-Profile localstack] [-EndpointUrl http://localhost:4566] [-SourceDir script/img] [-KeyPrefix products]
+bash:        PUBLIC_HOST=<host[:port]> [BUCKET=erp-products-images] [PROFILE=localstack] [ENDPOINT_URL=http://localhost:4566] [SOURCE_DIR=script/img] [KEY_PREFIX=products] ./script/upload-product-images.sh
+```
+
+Uploads every file in `SourceDir` with `aws s3 cp <file> s3://<bucket>/<key-prefix>/<file>`,
+then prints `<PublicHost>/<bucket>/<key-prefix>/<file>` URLs and matching
+`UPDATE public.products` statements, based on the filename → SKU map defined
+at the top of the script.

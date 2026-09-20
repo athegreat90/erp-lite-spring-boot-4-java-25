@@ -1,5 +1,6 @@
 package de.alexandermora.erplite.application.query;
 
+import de.alexandermora.erplite.application.exception.QueryException;
 import de.alexandermora.erplite.commons.enums.CatalogType;
 import de.alexandermora.erplite.domain.port.repository.CatalogRepositoryPort;
 import de.alexandermora.erplite.domain.views.ItemsView;
@@ -17,6 +18,10 @@ public class FindCatalogItemsByTypeQuery {
 
     public List<ItemsView> execute(CatalogType catalogType) {
         log.info("Executing FindCatalogItemsByTypeQuery for catalogType: {}", catalogType);
-        return catalogRepository.findItemsByType(catalogType);
+        try {
+            return catalogRepository.findItemsByType(catalogType);
+        } catch (RuntimeException e) {
+            throw new QueryException(e.getMessage(), e);
+        }
     }
 }

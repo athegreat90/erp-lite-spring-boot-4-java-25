@@ -12,6 +12,9 @@ dependencies {
     // Spring Web lives only in erp-api.
     implementation 'org.springframework.boot:spring-boot-starter-web'
 
+    // OpenAPI / Swagger UI for the REST controllers
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.3'
+
     // Integration tests run against a real Postgres via Testcontainers
     // (the JPA schema uses uuid-ossp / pg_trgm, so H2 is not an option).
     testImplementation 'org.springframework.boot:spring-boot-testcontainers'

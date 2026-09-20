@@ -98,5 +98,14 @@ logging:
 server:
   port: 9090
 
+# Open API
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+  api-docs:
+    path: /v3/api-docs
+  packages-to-scan: de.alexandermora.erplite
+
 resend:
   from-address: watchtower@notifications.alexandermora.de  # replace with your verified domain address

@@ -1,5 +1,6 @@
 package de.alexandermora.erplite.infrastructure.rest.customer.config;
 
+import de.alexandermora.erplite.infrastructure.rest.customer.client.JsonPlaceholderClient;
 import de.alexandermora.erplite.infrastructure.rest.customer.model.JsonPlaceHolderConfigModel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -9,9 +10,14 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.support.RestClientAdapter;
+import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 
 import java.io.IOException;
+import java.net.http.HttpClient;
+import java.time.Duration;
 
 @Configuration
 @Slf4j
@@ -22,9 +28,16 @@ public class RestClientConfig {
     @Bean(name = "jsonplaceholder")
     @ConditionalOnProperty(prefix = "jsonplaceholder.api", name = "enabled", havingValue = "true", matchIfMissing = true)
     public RestClient restClient() {
+        var httpClient = HttpClient.newBuilder()
+                .connectTimeout(Duration.ofMillis(jsonConfig.connectionTimeout()))
+                .build();
+
+        var requestFactory = new JdkClientHttpRequestFactory(httpClient);
+        requestFactory.setReadTimeout(Duration.ofMillis(jsonConfig.readTimeout()));
 
         return RestClient.builder()
                 .baseUrl(jsonConfig.baseUrl())
+                .requestFactory(requestFactory)
                 .defaultHeaders(header -> {
                     header.set(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
                     header.set(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE);
@@ -34,6 +47,14 @@ public class RestClientConfig {
                     interceptors.add(errorLoggingInterceptor());
                 })
                 .build();
+    }
+
+    @Bean
+    @ConditionalOnProperty(prefix = "jsonplaceholder.api", name = "enabled", havingValue = "true", matchIfMissing = true)
+    public JsonPlaceholderClient jsonPlaceholderClient(RestClient restClient) {
+        var adapter = RestClientAdapter.create(restClient);
+        var factory = HttpServiceProxyFactory.builderFor(adapter).build();
+        return factory.createClient(JsonPlaceholderClient.class);
     }
 
     private ClientHttpRequestInterceptor loggingInterceptor() {

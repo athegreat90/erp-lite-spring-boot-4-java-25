@@ -2,48 +2,42 @@ package de.alexandermora.erplite.infrastructure.rest.customer.adapter;
 
 import de.alexandermora.erplite.domain.entity.customer.CustomerInfo;
 import de.alexandermora.erplite.domain.port.service.CustomerProviderServicePort;
+import de.alexandermora.erplite.infrastructure.rest.customer.client.JsonPlaceholderClient;
 import de.alexandermora.erplite.infrastructure.rest.customer.dto.UserDTO;
 import de.alexandermora.erplite.infrastructure.rest.customer.mapper.CustomerMapper;
-import de.alexandermora.erplite.infrastructure.rest.customer.model.JsonPlaceHolderConfigModel;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClient;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestClientResponseException;
 
 import java.util.Optional;
 
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class JsonPlaceholderCustomerProviderAdapter implements CustomerProviderServicePort {
 
-    private final RestClient jsonClient;
+    private final JsonPlaceholderClient jsonPlaceholderClient;
     private final CustomerMapper customerMapper;
-    private final String endpoint;
-
-    public JsonPlaceholderCustomerProviderAdapter(@Qualifier("jsonplaceholder") RestClient restClient, CustomerMapper customerMapper, JsonPlaceHolderConfigModel configModel) {
-        this.jsonClient = restClient;
-        this.customerMapper = customerMapper;
-        this.endpoint = configModel.usersEndpoints();
-    }
 
     @Override
     public Optional<CustomerInfo> findById(Long id) {
         try {
-            final UserDTO response = jsonClient.get().uri(endpoint, id).retrieve()
-                    .onStatus(HttpStatusCode::is4xxClientError, (req, res) -> {
-                        log.error("Client error while fetching customer with id {}: {}", id, res.getStatusCode());
-                    })
-                    .onStatus(HttpStatusCode::is5xxServerError, (req, res) -> {
-                        log.error("Server error while fetching customer with id {}: {}", id, res.getStatusCode());
-                    }).toEntity(UserDTO.class).getBody();
+            final UserDTO response = jsonPlaceholderClient.getUserById(id);
             if (response == null) {
                 log.warn("No customer found with id {}", id);
                 return Optional.empty();
             }
             return Optional.of(customerMapper.toCustomerInfo(response));
+        } catch (HttpClientErrorException.NotFound ex) {
+            log.warn("No customer found with id {}", id);
+            return Optional.empty();
+        } catch (RestClientResponseException ex) {
+            log.error("Error fetching customer with id {}: {}", id, ex.getStatusCode(), ex);
+            return Optional.empty();
         } catch (RestClientException ex) {
             String format = String.format("Error fetching customer with id %d: %s", id, ex.getMessage());
             log.error(format, ex);

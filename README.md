@@ -248,6 +248,69 @@ must be set to send order-confirmation emails. Most logging/behaviour
 toggles are also overridable (`LOG_LEVEL_ROOT`, `JPA_SHOW_SQL`,
 `ERROR_INCLUDE_STACKTRACE`, …).
 
+## REST API
+
+`erp-api` exposes the application's use cases and queries over HTTP. Base URL:
+`http://localhost:9090`.
+
+### Versioning
+
+Every endpoint is header-versioned (`ApiVersionConfig`): requests must include
+
+```
+X-Api-Version: 1
+```
+
+### Command endpoints
+
+Write operations. Successful responses carry no body (`201 Created` with a
+`Location` header for creates, `204 No Content` otherwise).
+
+| Method  | Path                                 | Body                                | Notes |
+|---------|---------------------------------------|--------------------------------------|-------|
+| `POST`  | `/api/commands/orders`                | JSON `CreateOrderCommand`            | `201` + `Location: /api/commands/orders/{id}` |
+| `PATCH` | `/api/commands/orders/{id}/cancel`    | — (`reason` query param)             | |
+| `PATCH` | `/api/commands/orders/{id}/status`    | — (`status` query param)             | |
+| `POST`  | `/api/commands/products`              | multipart: `product` (JSON) + `image` (file) | `201` + `Location: /api/commands/products/{id}` |
+| `PUT`   | `/api/commands/products/{id}`         | multipart: `product` (JSON) + `image` (file) | |
+| `PATCH` | `/api/commands/products/{id}/deactivate` | —                                  | |
+| `PATCH` | `/api/commands/products/{id}/stock`   | JSON `UpdateStockCommand` (`operation`, `quantity`, `reason`) | |
+
+### Query endpoints
+
+Read operations. Successful responses return a `BaseResponseWrapper<T>` JSON
+body (`{ "data": ..., "date": ... }`).
+
+| Method | Path                                          | Notes |
+|--------|------------------------------------------------|-------|
+| `GET`  | `/api/queries/catalogs/{type}`                 | `type` is a `CatalogType` name, e.g. `PRODUCT_CATEGORIES` |
+| `GET`  | `/api/queries/catalogs/{type}/items`           | |
+| `GET`  | `/api/queries/catalogs/{type}/items?code=`     | |
+| `GET`  | `/api/queries/products/{id}`                   | |
+| `GET`  | `/api/queries/products?sku=`                   | |
+| `GET`  | `/api/queries/products/active`                 | |
+| `GET`  | `/api/queries/products/search?text=`           | |
+| `GET`  | `/api/queries/products?category=`              | |
+
+### Error responses
+
+`GlobalExceptionHandler` maps domain/application exceptions to
+[RFC 7807](https://www.rfc-editor.org/rfc/rfc7807) `ProblemDetail` bodies:
+
+| Exception                    | Status | Meaning |
+|-------------------------------|--------|---------|
+| `MyBusinessException`         | 409    | Domain business rule violation |
+| `CommandException`            | 422    | Command could not be processed |
+| `QueryException` (not found)  | 404    | Requested resource doesn't exist |
+| `QueryException` (infra cause)| 500    | Underlying repository/infra failure |
+| `MethodArgumentNotValidException` | 400 | `@Valid` request validation failure (field errors in `errors` property) |
+| any other `RuntimeException`  | 500    | Unexpected error |
+
+### API docs
+
+Swagger UI: `http://localhost:9090/swagger-ui.html` · OpenAPI JSON:
+`http://localhost:9090/v3/api-docs` (`OpenApiConfig` + springdoc).
+
 ## Repository layout
 
 ```

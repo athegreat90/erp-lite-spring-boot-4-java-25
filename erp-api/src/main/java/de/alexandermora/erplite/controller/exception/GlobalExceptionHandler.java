@@ -82,7 +82,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(RuntimeException.class)
     public ProblemDetail handlerRuntimeException(RuntimeException ex, HttpServletRequest request) {
 
-        log.warn("General error detected");
+        log.error("General error detected", ex);
 
         return get500ProblemDetail(request.getRequestURI());
     }
@@ -94,7 +94,7 @@ public class GlobalExceptionHandler {
     public ProblemDetail handlerMethodArgumentNotValidException(
             MethodArgumentNotValidException ex, HttpServletRequest request) {
 
-        Map<String, String> errors = ex.getBindingResult()
+        var errors = ex.getBindingResult()
                 .getFieldErrors()
                 .stream()
                 .collect(Collectors.toMap(

@@ -81,7 +81,7 @@ spring:
     error:
       include-message: ${ERROR_INCLUDE_MESSAGE:always}
       include-binding-errors: ${ERROR_INCLUDE_BINDING:always}
-      include-stacktrace: ${ERROR_INCLUDE_STACKTRACE:always}
+      include-stacktrace: ${ERROR_INCLUDE_STACKTRACE:never}
 
 logging:
   pattern:

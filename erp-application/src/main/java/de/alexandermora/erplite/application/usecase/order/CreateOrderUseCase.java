@@ -47,7 +47,7 @@ public class CreateOrderUseCase {
 
             log.info("Order created with ID: {} and Order Number: {}", savedOrder.getId(), orderNumber.value());
             sendEmail(savedOrder, customer);
-            return savedOrder.getId().toString();
+            return savedOrder.getId().value().toString();
         } catch (IllegalArgumentException e) {
             log.error("Invalid data", e);
             throw e;

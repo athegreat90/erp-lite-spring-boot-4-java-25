@@ -153,6 +153,18 @@ create-s3-bucket        [-Bucket erp-products-images] [-Profile localstack] [-En
                         [BUCKET=…] [PROFILE=…] [ENDPOINT_URL=…]
 ```
 
+## Environment variables
+
+`compose.yml` maps Postgres and MongoDB to non-default host ports, so a few env
+vars need to be set for the app to reach them (and to keep the Mongo driver
+quiet) when running outside of Spring Boot's Docker Compose auto-detection:
+
+| Variable          | Value                                        | Why                                                                                      |
+|-------------------|-----------------------------------------------|-------------------------------------------------------------------------------------------|
+| `DB_URL`          | `jdbc:postgresql://localhost:15432/erp_db`   | `application.yaml`'s default uses Postgres's standard port `5432`, but `compose.yml` publishes it on host port `15432` (`ports: "15432:5432"`) |
+| `MONGODB_PORT`    | `27019`                                       | same story: the default is the standard `27017`, but `compose.yml` publishes MongoDB on host port `27019` (`ports: "27019:27017"`) |
+| `LOG_LEVEL_MONGO` | `WARN`                                        | `application.yaml` defaults Mongo driver logging to `DEBUG`, which is very noisy for normal local runs |
+
 ## External integrations
 
 ### Customer data — JsonPlaceholder

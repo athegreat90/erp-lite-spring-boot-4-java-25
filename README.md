@@ -53,7 +53,7 @@ The domain model is described declaratively in
 
 `compose.yml` defines Postgres and LocalStack directly, and pulls in MongoDB
 and Redis via Compose's `include:` from the sibling
-[`erp-infra`](../erp-infra) repo (shared with `erp-worker`) — so a single
+[`erp-infra`](https://github.com/athegreat90/erp-infra) repo (shared with `erp-worker`) — so a single
 `docker compose up -d` here starts everything:
 
 | Service              | Container            | Port(s)              | Notes                                                        |

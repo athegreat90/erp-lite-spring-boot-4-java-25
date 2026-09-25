@@ -69,6 +69,14 @@ This requires `erp-infra` to be checked out as a sibling directory
 of `compose.yml` if it lives somewhere else. See its README for service
 details independent of this app.
 
+> **`erp-worker` also includes `erp-infra`'s compose file and can start the
+> same Mongo/Redis containers.** They share the fixed container names
+> `erp-mongodb`/`erp-redis`, so only one of `erp-lite`, `erp-worker`, or
+> `erp-infra` directly should be "in charge" of starting them at a time. If
+> you switch from one to another and hit `Conflict. The container name
+> "/erp-mongodb" is already in use`, run `docker rm erp-mongodb erp-redis`
+> (or `docker compose down` from whichever one last started them) first.
+
 Credentials for every service (course project — not secret): user `athegreat` /
 password `secret`. Persisted data lives under `db/<service>/data/` (git-ignored,
 Mongo/Redis under `erp-infra/db/` instead).

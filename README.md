@@ -51,15 +51,18 @@ The domain model is described declaratively in
 
 ## Local infrastructure
 
-`compose.yml` defines everything the app talks to:
+`compose.yml` defines the infrastructure specific to this app:
 
 | Service              | Container            | Port(s)              | Notes                                                        |
 |----------------------|----------------------|----------------------|-------------------------------------------------------------|
 | PostgreSQL 17 (alpine) | `erp-postgres`      | `5432`               | DB `erp_db`, schema + seed data from `db/postgresql/init/*.sql` |
-| MongoDB 8            | `erp-mongodb`        | `27017`              | DB `erp_catalog_db`, seeded by `db/mongodb/init/init-mongo.js` |
-| Redis (alpine)       | `erp-redis`          | `6379`               | catalog cache, password-protected, AOF persistence           |
 | LocalStack 4.5       | `erp-localstack`     | `4566`, `4510-4559`  | S3 only; pinned to the last token-free community release. A `ready.d` init hook (`db/localstack/init/ready.d/010-create-bucket.py`) creates the `erp-products-images` bucket on every start |
 | LocalStack bootstrap | `erp-localstack-init`| —                    | optional one-shot bucket bootstrap; only runs under `docker compose --profile init up` |
+
+MongoDB and Redis are **not** in this file — they're shared with `erp-worker`
+and live in the sibling [`erp-infra`](../erp-infra) repo. Run
+`docker compose up -d` there before starting this app; see its README for
+service details.
 
 Credentials for every service (course project — not secret): user `athegreat` /
 password `secret`. Persisted data lives under `db/<service>/data/` (git-ignored).
@@ -77,19 +80,16 @@ docker compose down -v            # stop and wipe volumes
 > `erp-api` has Spring Boot Docker Compose support on the classpath
 > (`developmentOnly`) and it is **enabled** (`spring.docker.compose.enabled=true`,
 > `spring.docker.compose.file=../compose.yml`). Running `./gradlew :erp-api:bootRun`
-> from the repo root starts the root `compose.yml` automatically and wires the
-> services into the app; starting it manually as above also works. The
-> `erp-localstack-init` service is behind the `init` profile because a container
-> that exits breaks `docker compose up --wait`.
+> from the repo root starts this (now Postgres + LocalStack only) `compose.yml`
+> automatically and wires those two services into the app; starting it manually
+> as above also works. The `erp-localstack-init` service is behind the `init`
+> profile because a container that exits breaks `docker compose up --wait`.
 >
-> Docker Compose service connections auto-detect a service's host/port from
-> the running container, but for Redis it does **not** detect auth — so an
-> unmodified `redis` service started with `--requirepass` fails app startup
-> with `NOAUTH HELLO must be called with the client already authenticated`.
-> The `redis` service in `compose.yml` carries the label
-> `org.springframework.boot.ignore: "true"` to opt it out of auto-detection,
-> so the app falls back to the (correct, password-including)
-> `spring.data.redis.*` properties in `application.yaml` instead.
+> MongoDB and Redis are managed by the separate `erp-infra` repo and started
+> manually — they are not part of this compose file at all, so Spring Boot's
+> Docker Compose auto-detection never sees them. The app still reaches them via
+> the ordinary `spring.mongodb.uri` / `spring.data.redis.*` properties in
+> `application.yaml`, pointed at `erp-infra`'s published ports.
 
 ### AWS / LocalStack setup
 
@@ -155,14 +155,16 @@ create-s3-bucket        [-Bucket erp-products-images] [-Profile localstack] [-En
 
 ## Environment variables
 
-`compose.yml` maps Postgres and MongoDB to non-default host ports, so a few env
-vars need to be set for the app to reach them (and to keep the Mongo driver
+MongoDB and Redis must be started separately via the [`erp-infra`](../erp-infra)
+repo (`docker compose up -d`); the ports/credentials below assume its defaults.
+`compose.yml` also maps Postgres to a non-default host port, so a few env vars
+need to be set for the app to reach everything (and to keep the Mongo driver
 quiet) when running outside of Spring Boot's Docker Compose auto-detection:
 
 | Variable          | Value                                        | Why                                                                                      |
 |-------------------|-----------------------------------------------|-------------------------------------------------------------------------------------------|
 | `DB_URL`          | `jdbc:postgresql://localhost:15432/erp_db`   | `application.yaml`'s default uses Postgres's standard port `5432`, but `compose.yml` publishes it on host port `15432` (`ports: "15432:5432"`) |
-| `MONGODB_PORT`    | `27019`                                       | same story: the default is the standard `27017`, but `compose.yml` publishes MongoDB on host port `27019` (`ports: "27019:27017"`) |
+| `MONGODB_PORT`    | `27019`                                       | same story: the default is the standard `27017`, but `erp-infra` publishes MongoDB on host port `27019` (`ports: "27019:27017"`) |
 | `LOG_LEVEL_MONGO` | `WARN`                                        | `application.yaml` defaults Mongo driver logging to `DEBUG`, which is very noisy for normal local runs |
 
 ## External integrations
@@ -244,6 +246,9 @@ Docker must be running.
 ## Run the app
 
 ```sh
+# in the sibling erp-infra repo, once:
+docker compose up -d
+# then, in this repo:
 docker compose up -d
 ./gradlew :erp-api:bootRun
 ```
@@ -251,7 +256,8 @@ docker compose up -d
 The API listens on **`http://localhost:9090`**. Configuration lives in
 [`erp-api/src/main/resources/application.yaml`](erp-api/src/main/resources/application.yaml).
 Datasource/Mongo/Redis credentials default to the local Docker Compose
-values but are overridable via environment variables (`DB_USERNAME`,
+values (Postgres/LocalStack from this repo, Mongo/Redis from `erp-infra`)
+but are overridable via environment variables (`DB_USERNAME`,
 `DB_PASSWORD`, `DB_URL`, `MONGODB_USERNAME`, `MONGODB_PASSWORD`,
 `MONGODB_HOST`, `MONGODB_PORT`, `REDIS_HOST`, `REDIS_PORT`,
 `REDIS_PASSWORD`); mail credentials (`MAIL_USERNAME`, `MAIL_API_KEY`, see
@@ -326,7 +332,7 @@ Swagger UI: `http://localhost:9090/swagger-ui.html` · OpenAPI JSON:
 ## Repository layout
 
 ```
-compose.yml            local infrastructure (Postgres, Mongo, Redis, LocalStack)
+compose.yml            local infrastructure (Postgres, LocalStack — Mongo/Redis live in the sibling erp-infra repo)
 build.gradle            root build: toolchain, Spring BOM, shared deps
 settings.gradle         module list
 db/                     per-service init scripts + git-ignored data volumes

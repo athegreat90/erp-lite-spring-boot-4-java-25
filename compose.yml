@@ -1,3 +1,11 @@
+# Pulls in the shared MongoDB + Redis stack from the sibling erp-infra repo so
+# a single `docker compose up -d` (or `bootRun`, via Spring Boot Docker
+# Compose support) starts everything this app needs. Requires erp-infra to be
+# checked out as a sibling directory (../erp-infra relative to this file); if
+# it lives somewhere else, edit the path below.
+include:
+  - path: ../erp-infra/compose.yml
+
 services:
   # PostgreSQL - Transactional database (Orders, Products)
   postgres:
